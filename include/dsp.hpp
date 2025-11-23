@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <atomic>
 #include <memory>
 #include <plaits/dsp/dsp.h>
 #include <plaits/dsp/voice.h>

@@ -11,12 +11,6 @@ void dsp_init(std::shared_ptr<flechtbox_dsp> dsp)
 	dsp->clock.samplerate = SAMPLERATE;
 
 	for (int i = 0; i < NUM_TRACKS; i++) { plaits_voice_init(dsp->plaits_voices[i]); }
-
-	// NOTE: manually write some values into the sequence
-	dsp->track_sequencers[0].data[0].enabled = true;
-	dsp->track_sequencers[0].data[5].enabled = true;
-	dsp->track_sequencers[0].data[7].enabled = true;
-	dsp->track_sequencers[0].data[3].enabled = true;
 }
 
 void plaits_voice_init(plaits_voice& p)
@@ -55,6 +49,15 @@ void plaits_voice_init(plaits_voice& p)
 	p.modulations.sustain_level = 0;
 }
 
+bool rand_bool(int probability)
+{
+	// Generate a random number from 0 to 99
+	int randomValue = rand() % 100;
+
+	// Return true if random value is less than the probability
+	return randomValue < probability;
+}
+
 void dsp_process_block(std::shared_ptr<flechtbox_dsp> dsp, float* out, int frames)
 {
 	// clear audio
@@ -67,13 +70,13 @@ void dsp_process_block(std::shared_ptr<flechtbox_dsp> dsp, float* out, int frame
 
 		// render all tracks
 		for (int t = 0; t < NUM_TRACKS; t++) {
-			auto track_step_state = track_seq_process_sample(dsp->track_sequencers[t],
-															 dsp->clock.cur_clock_states);
+			int step_probability = track_seq_process_sample(dsp->track_sequencers[t],
+															dsp->clock.cur_clock_states);
 
 			auto& p = dsp->plaits_voices[t];
 
-			if (track_step_state != nullptr && track_step_state->enabled) {
-				p.modulations.trigger = 1.f;
+			if (step_probability > 0) {
+				p.modulations.trigger = rand_bool(step_probability);
 			}
 
 			p.voice->Render(p.patch, p.modulations, p.frames, PLAITS_BLOCKSIZE);

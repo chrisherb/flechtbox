@@ -11,62 +11,91 @@
 
 using namespace ftxui;
 
-Element blinking_light(std::shared_ptr<flechtbox_dsp> dsp) {
-  // Read the DSP state
-  bool light_on = dsp->clock.quarter_gate;
-  return light_on ? text("●") | color(Color::Green)
-                  : text("○") | color(Color::GrayDark);
+Element blinking_light(std::shared_ptr<flechtbox_dsp> dsp)
+{
+	// Read the DSP state
+	bool light_on = dsp->clock.quarter_gate;
+	return light_on ? text("●") | color(Color::Green)
+					: text("○") | color(Color::GrayDark);
 }
 
-void ui_run(ftxui::ScreenInteractive &screen,
-            std::shared_ptr<flechtbox_dsp> dsp) {
-  std::vector<std::string> tab_values{
-      "T1", "T2", "T4", "T5", "T6", "T7", "T8", "T9", "MT",
-  };
+std::shared_ptr<ComponentBase> get_steps(std::shared_ptr<flechtbox_dsp> dsp,
+										 int sequencer, int step)
+{
+	auto options =
+		SliderOption<int>({.value = &dsp->track_sequencers[sequencer].data[step],
+						   .min = 0,
+						   .max = 100,
+						   .increment = 10,
+						   .direction = Direction::Up});
+	return Slider(options);
+}
 
-  int tab_selected = 0;
-  auto track_selector = Toggle(&tab_values, &tab_selected);
+void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp)
+{
+	std::vector<std::string> tab_values {
+		"T1", "T2", "T4", "T5", "T6", "T7", "T8", "T9", "MT",
+	};
 
-  auto steps_container = Container::Horizontal({});
+	/////////////
+	// TOP BAR //
+	/////////////
+	int tab_selected = 0;
+	auto track_selector = Toggle(&tab_values, &tab_selected);
+	auto start_btn = Checkbox("run", &dsp->clock.running);
+	auto btn_container = Container::Horizontal({start_btn});
+	auto top_container = Container::Horizontal({track_selector, btn_container});
 
-  auto titled_probability_container = Renderer(steps_container, [&] {
-    return window(text("probability") | bold, steps_container->Render());
-  });
+	////////////////////
+	// MAIN CONTAINER //
+	////////////////////
+	auto steps_container = Container::Horizontal({
+		get_steps(dsp, 0, 0) | xflex_grow,
+		get_steps(dsp, 0, 1) | xflex_grow,
+		get_steps(dsp, 0, 2) | xflex_grow,
+		get_steps(dsp, 0, 3) | xflex_grow,
+		get_steps(dsp, 0, 4) | xflex_grow,
+		get_steps(dsp, 0, 5) | xflex_grow,
+		get_steps(dsp, 0, 6) | xflex_grow,
+		get_steps(dsp, 0, 7) | xflex_grow,
+		get_steps(dsp, 0, 8) | xflex_grow,
+		get_steps(dsp, 0, 9) | xflex_grow,
+	});
 
-  auto track_container = Container::Tab(
-      {titled_probability_container | flex | flex_grow}, &tab_selected);
+	// put border around steps container
+	auto titled_probability_container = Renderer(steps_container, [&] {
+		return window(text("steps"), steps_container->Render());
+	});
 
-  auto main_container = Container::Vertical({
-      track_selector,
-      track_container,
-  });
+	auto track_container =
+		Container::Tab({titled_probability_container | flex}, &tab_selected);
 
-  auto renderer = Renderer(main_container, [&] {
-    return vbox({track_selector->Render(), separator(),
-                 track_container->Render(), blinking_light(dsp)}) |
-           border;
-  });
+	auto main_container = Container::Vertical({top_container, track_container});
 
-  // thread to poll dsp metronome for ui redraws
-  bool running = true;
-  std::thread([&] {
-    bool gate_change = false;
-    while (running) {
-      bool current_gate = dsp.get()->clock.thirtysecond_gate;
+	auto renderer = Renderer(main_container, [&] {
+		return vbox({top_container->Render(), separator(), track_container->Render(),
+					 blinking_light(dsp)});
+	});
 
-      if (current_gate != gate_change) {
-        gate_change = current_gate;
-        screen.RequestAnimationFrame();
-        // screen.PostEvent(Event::Custom);
-      }
-      std::this_thread::sleep_for(
-          std::chrono::milliseconds(2)); // adjust speed!
-    }
-  }).detach();
+	// thread to poll dsp metronome for ui redraws
+	bool ui_running = true;
+	std::thread([&] {
+		bool gate_change = false;
+		while (ui_running) {
+			bool current_gate = dsp.get()->clock.thirtysecond_gate;
 
-  screen.Loop(renderer);
+			if (current_gate != gate_change) {
+				gate_change = current_gate;
+				screen.RequestAnimationFrame();
+				// screen.PostEvent(Event::Custom);
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(2)); // adjust speed!
+		}
+	}).detach();
 
-  running = false;
+	screen.Loop(renderer);
 
-  printf("ui terminated\n");
+	ui_running = false;
+
+	printf("ui terminated\n");
 }

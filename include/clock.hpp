@@ -1,7 +1,6 @@
 #pragma once
 
 #include <array>
-#include <atomic>
 #include <cstdio>
 
 enum clock_division {
@@ -18,17 +17,16 @@ struct metronome {
 	double samplerate = 48000;
 	float tempo = 120.f;
 
-	std::atomic<bool> running = true;
-	std::atomic<bool> quarter_gate = false;		 // for the blinkenlights
-	std::atomic<bool> thirtysecond_gate = false; // for ui redraw
+	bool running = false;
+	bool quarter_gate = false;		// for the blinkenlights
+	bool thirtysecond_gate = false; // for ui redraw
 
 	unsigned long count = 0;
 
 	std::array<bool, CL_NUM_CLOCK_DIVISIONS> cur_clock_states;
 };
 
-inline std::array<bool, CL_NUM_CLOCK_DIVISIONS>& clock_process_block(metronome& c,
-																	 int frames)
+inline void clock_process_block(metronome& c, int frames)
 {
 	// reset
 	c.cur_clock_states[CL_WHOLE] = false;
@@ -37,6 +35,8 @@ inline std::array<bool, CL_NUM_CLOCK_DIVISIONS>& clock_process_block(metronome& 
 	c.cur_clock_states[CL_EIGHTH] = false;
 	c.cur_clock_states[CL_SIXTEENTH] = false;
 	c.cur_clock_states[CL_THIRTYSECOND] = false;
+
+	if (!c.running) return;
 
 	for (int i = 0; i < frames; i++) {
 		int q_smp = (60.f / c.tempo) * c.samplerate;
@@ -57,6 +57,4 @@ inline std::array<bool, CL_NUM_CLOCK_DIVISIONS>& clock_process_block(metronome& 
 
 		c.count++;
 	}
-
-	return c.cur_clock_states;
 }
