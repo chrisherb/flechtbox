@@ -4,80 +4,69 @@
 #include "audio.hpp"
 #include "dsp.hpp"
 
-void audio_run(std::shared_ptr<flechtbox_dsp> dsp) {
-  // init dsp
-  dsp_init(*dsp.get(), SAMPLERATE);
+void audio_run(std::shared_ptr<flechtbox_dsp> dsp)
+{
+	// init dsp
+	dsp_init(dsp);
 
-  // init portaudio
-  PaStream *stream;
-  PaError err;
+	// init portaudio
+	PaStream* stream;
+	PaError err;
 
-  err = Pa_Initialize();
-  if (err != paNoError)
-    goto error;
+	err = Pa_Initialize();
+	if (err != paNoError) goto error;
 
-  /* Open an audio I/O stream. */
-  err = Pa_OpenDefaultStream(&stream, 0, /* no input channels */
-                             2,          /* stereo output */
-                             paFloat32,  /* 32 bit floating point output */
-                             SAMPLERATE, BLOCKSIZE, /* frames per buffer */
-                             portaudio_callback, &dsp);
+	/* Open an audio I/O stream. */
+	err = Pa_OpenDefaultStream(&stream, 0,			  /* no input channels */
+							   2,					  /* stereo output */
+							   paFloat32,			  /* 32 bit floating point output */
+							   SAMPLERATE, BLOCKSIZE, /* frames per buffer */
+							   portaudio_callback, &dsp);
 
-  if (err != paNoError)
-    goto error;
+	if (err != paNoError) goto error;
 
-  err = Pa_StartStream(stream);
-  if (err != paNoError)
-    goto error;
+	err = Pa_StartStream(stream);
+	if (err != paNoError) goto error;
 
-  while (!dsp->should_quit) {
-    Pa_Sleep(100);
-  }
+	while (!dsp->should_quit) { Pa_Sleep(100); }
 
-  err = Pa_StopStream(stream);
-  if (err != paNoError)
-    goto error;
+	err = Pa_StopStream(stream);
+	if (err != paNoError) goto error;
 
-  err = Pa_CloseStream(stream);
-  if (err != paNoError)
-    goto error;
+	err = Pa_CloseStream(stream);
+	if (err != paNoError) goto error;
 
-  Pa_Terminate();
+	Pa_Terminate();
 
-  printf("audio terminated\n");
+	printf("audio terminated\n");
 
 error:
-  if (stream) {
-    // attempt to be safe, ignore errors
-    Pa_StopStream(stream);
-    Pa_CloseStream(stream);
-  }
-  Pa_Terminate();
-  if (err != paNoError) { // Only print if error occurred!
-    fprintf(stderr, "An error occurred while using the portaudio stream\n");
-    fprintf(stderr, "Error number: %d\n", err);
-    fprintf(stderr, "Error message: %s\n", Pa_GetErrorText(err));
-  }
+	if (stream) {
+		// attempt to be safe, ignore errors
+		Pa_StopStream(stream);
+		Pa_CloseStream(stream);
+	}
+	Pa_Terminate();
+	if (err != paNoError) { // Only print if error occurred!
+		fprintf(stderr, "An error occurred while using the portaudio stream\n");
+		fprintf(stderr, "Error number: %d\n", err);
+		fprintf(stderr, "Error message: %s\n", Pa_GetErrorText(err));
+	}
 }
 
-int portaudio_callback(const void *input, void *outputBuffer,
-                       unsigned long framesPerBuffer,
-                       const PaStreamCallbackTimeInfo *timeInfo,
-                       PaStreamCallbackFlags statusFlags, void *userData) {
-  /* Cast data passed through stream to our structure. */
-  std::shared_ptr<flechtbox_dsp> *dsp =
-      (std::shared_ptr<flechtbox_dsp> *)userData;
+int portaudio_callback(const void* input, void* outputBuffer,
+					   unsigned long framesPerBuffer,
+					   const PaStreamCallbackTimeInfo* timeInfo,
+					   PaStreamCallbackFlags statusFlags, void* userData)
+{
+	/* Cast data passed through stream to our structure. */
+	std::shared_ptr<flechtbox_dsp>* dsp = (std::shared_ptr<flechtbox_dsp>*)userData;
 
-  float *out = (float *)outputBuffer;
+	float* out = (float*)outputBuffer;
 
-  (void)input; /* Prevent unused variable warning. */
+	(void)input; /* Prevent unused variable warning. */
 
-  dsp_process_block(*dsp->get(), out, framesPerBuffer);
+	dsp_process_block(*dsp, out, framesPerBuffer);
 
-  // for (int i = 0; i < framesPerBuffer; i++) {
-  //   *out++ = data->left_phase;  /* left */
-  //   *out++ = data->right_phase; /* right */
-  // }
-
-  return 0;
+	return 0;
 }
