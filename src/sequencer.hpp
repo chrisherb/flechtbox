@@ -5,7 +5,7 @@
 
 #include "clock.hpp"
 
-enum playback_dir { PB_FORWARD, PB_BACKWARD, PB_PENDULUM, PB_RANDOM };
+enum playback_directions { PB_FORWARD, PB_BACKWARD, PB_PENDULUM, PB_RANDOM };
 
 struct step_state {
   bool enabled = false;
@@ -15,7 +15,7 @@ struct step_state {
 struct track_seq {
   unsigned int current_pos = 0;
   unsigned int length = 10;
-  playback_dir playback_dir = PB_FORWARD;
+  playback_directions playback_dir = PB_FORWARD;
   std::array<step_state, 10> data;
   bool pendulum_forward = true;
   clock_division division = CL_SIXTEENTH;

@@ -2,14 +2,11 @@
 #include <memory>
 
 #include "audio.hpp"
-#include "clock.hpp"
-
-const double SAMPLERATE = 48000;
-const int BLOCKSIZE = 256;
+#include "dsp.hpp"
 
 void audio_run(std::shared_ptr<flechtbox_dsp> dsp) {
   // init dsp
-  dsp_init(dsp, SAMPLERATE);
+  dsp_init(*dsp.get(), SAMPLERATE);
 
   // init portaudio
   PaStream *stream;
@@ -75,10 +72,12 @@ int portaudio_callback(const void *input, void *outputBuffer,
 
   (void)input; /* Prevent unused variable warning. */
 
-  for (int i = 0; i < framesPerBuffer; i++) {
-    //*out++ = data->left_phase;  /* left */
-    //*out++ = data->right_phase; /* right */
-    clock_tick(dsp->get()->clock);
-  }
+  dsp_process_block(*dsp->get(), out, framesPerBuffer);
+
+  // for (int i = 0; i < framesPerBuffer; i++) {
+  //   *out++ = data->left_phase;  /* left */
+  //   *out++ = data->right_phase; /* right */
+  // }
+
   return 0;
 }
