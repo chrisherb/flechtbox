@@ -63,12 +63,23 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 	});
 
 	// put border around steps container
-	auto titled_probability_container = Renderer(steps_container, [&] {
+	auto track_container_1 = Renderer(steps_container, [&] {
 		return window(text("steps"), steps_container->Render());
 	});
+	auto track_container_2 = Container::Horizontal({});
+	auto track_container_3 = Container::Horizontal({});
+	auto track_container_4 = Container::Horizontal({});
+	auto track_container_5 = Container::Horizontal({});
+	auto track_container_6 = Container::Horizontal({});
+	auto track_container_7 = Container::Horizontal({});
+	auto track_container_8 = Container::Horizontal({});
+	auto track_container_9 = Container::Horizontal({});
 
-	auto track_container =
-		Container::Tab({titled_probability_container | flex}, &tab_selected);
+	auto track_container = Container::Tab(
+		{track_container_1 | flex, track_container_2 | flex, track_container_3 | flex,
+		 track_container_4 | flex, track_container_5 | flex, track_container_6 | flex,
+		 track_container_7 | flex, track_container_8 | flex, track_container_9 | flex},
+		&tab_selected);
 
 	auto main_container = Container::Vertical({top_container, track_container});
 
