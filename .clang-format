@@ -1,0 +1,24 @@
+---
+BasedOnStyle: LLVM
+ColumnLimit: "90"
+IndentWidth: "4"
+TabWidth: "4"
+UseTab: Always
+AccessModifierOffset: "-4"
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortBlocksOnASingleLine: Always
+AllowShortLoopsOnASingleLine: true
+AllowShortEnumsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: Yes
+PackConstructorInitializers: Never
+BreakConstructorInitializers: BeforeComma
+PointerAlignment: Left
+ReferenceAlignment: Left
+ConstructorInitializerIndentWidth: 4
+SpaceBeforeCpp11BracedList: true
+SeparateDefinitionBlocks: Always
+
+BreakBeforeBraces: WebKit
+
+EmptyLineBeforeAccessModifier: LogicalBlock
+Cpp11BracedListStyle: true
