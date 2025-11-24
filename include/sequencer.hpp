@@ -1,9 +1,13 @@
 #pragma once
 
 #include <array>
+#include <climits>
 #include <cstdlib>
+#include <ctime>
 
 #include "clock.hpp"
+
+const int SEQ_NULL = INT_MIN;
 
 enum playback_directions {
 	PB_FORWARD,
@@ -19,12 +23,18 @@ struct track_seq {
 	std::array<int, 10> data;
 	bool pendulum_forward = true;
 	clock_division division = CL_SIXTEENTH;
+	int last_value;
 };
 
 inline void track_seq_init(track_seq& t) { t.data.fill(0); }
 
-inline int track_seq_process_step(track_seq& t)
+inline int
+track_seq_process_step(track_seq& t,
+					   const std::array<bool, CL_NUM_CLOCK_DIVISIONS>& clock_states)
 {
+	// only process if we land on a division;
+	if (!clock_states[t.division]) return SEQ_NULL;
+
 	// play head advancement
 	if (t.playback_dir == PB_FORWARD ||
 		(t.playback_dir == PB_PENDULUM && t.pendulum_forward))
@@ -51,14 +61,6 @@ inline int track_seq_process_step(track_seq& t)
 		break;
 	}
 
-	return t.data[t.current_pos];
-}
-
-inline int
-track_seq_process_sample(track_seq& t,
-						 const std::array<bool, CL_NUM_CLOCK_DIVISIONS>& clock_states)
-{
-	if (clock_states[t.division]) return track_seq_process_step(t);
-
-	return -1;
+	t.last_value = t.data[t.current_pos];
+	return t.last_value;
 }

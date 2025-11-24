@@ -15,6 +15,10 @@ void dsp_init(std::shared_ptr<flechtbox_dsp> dsp)
 		plaits_voice_init(dsp->plaits_voices[i]);
 		track_seq_init(dsp->track_sequencers[i]);
 	}
+
+	track_seq_init(dsp->pitch_sequence);
+	track_seq_init(dsp->octave_sequence);
+	dsp->velocity_sequence.data.fill(100);
 }
 
 void plaits_voice_init(plaits_voice& p)
@@ -72,15 +76,24 @@ void dsp_process_block(std::shared_ptr<flechtbox_dsp> dsp, float* out, int frame
 		// clock states for this block
 		clock_process_block(dsp->clock, PLAITS_BLOCKSIZE);
 
+		track_seq_process_step(dsp->pitch_sequence, dsp->clock.cur_clock_states);
+		track_seq_process_step(dsp->octave_sequence, dsp->clock.cur_clock_states);
+		track_seq_process_step(dsp->velocity_sequence, dsp->clock.cur_clock_states);
+
+		int global_pitch = dsp->pitch_sequence.last_value;
+		int global_octave = dsp->octave_sequence.last_value;
+		int global_velocity = dsp->velocity_sequence.last_value;
+
 		// render all tracks
 		for (int t = 0; t < NUM_TRACKS; t++) {
-			int step_probability = track_seq_process_sample(dsp->track_sequencers[t],
-															dsp->clock.cur_clock_states);
+			int step_probability = track_seq_process_step(dsp->track_sequencers[t],
+														  dsp->clock.cur_clock_states);
 
 			auto& p = dsp->plaits_voices[t];
 
-			if (step_probability > 0) {
-				p.modulations.trigger = rand_bool(step_probability);
+			if (rand_bool(step_probability)) {
+				p.patch.note = p.pitch + global_pitch + global_octave;
+				p.modulations.trigger = 1.f;
 			}
 
 			p.voice->Render(p.patch, p.modulations, p.frames, PLAITS_BLOCKSIZE);
@@ -93,7 +106,7 @@ void dsp_process_block(std::shared_ptr<flechtbox_dsp> dsp, float* out, int frame
 			float voice_out = 0.f;
 			for (int t = 0; t < NUM_TRACKS; t++) {
 				auto& p = dsp->plaits_voices[t];
-				voice_out += p.frames[i].out / 32768.0f;
+				voice_out += p.frames[i].out / 32768.0f * global_velocity / 127.f;
 				// float voice_aux = p.frames[i].aux / 32768.0f;
 			}
 			*out++ += voice_out; /* left */
