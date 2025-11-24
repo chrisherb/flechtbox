@@ -70,6 +70,7 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 			FloatControl(&dsp->plaits_voices[t].patch.harmonics),
 			FloatControl(&dsp->plaits_voices[t].patch.timbre),
 			FloatControl(&dsp->plaits_voices[t].patch.morph),
+			IntegerControl(&dsp->track_sequencers[t].length, 1, 2, 10),
 			Dropdown(&engines, &dsp->plaits_voices[t].patch.engine),
 		});
 

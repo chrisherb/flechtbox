@@ -14,7 +14,7 @@ enum playback_directions {
 
 struct track_seq {
 	unsigned int current_pos = 0;
-	unsigned int length = 10;
+	int length = 10;
 	playback_directions playback_dir = PB_FORWARD;
 	std::array<int, 10> data;
 	bool pendulum_forward = true;
