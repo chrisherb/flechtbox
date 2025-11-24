@@ -20,6 +20,12 @@ const int NUM_STEPS = 10;
 struct plaits_voice {
 	int pitch = 48;
 
+	bool global_pitch_enabled = true;
+	bool global_velocity_enabled = true;
+	bool global_octave_enabled = true;
+
+	float current_velocity = 1.f;
+
 	plaits::Patch patch;
 	plaits::Modulations modulations;
 	plaits::Voice* voice;

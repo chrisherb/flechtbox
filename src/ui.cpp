@@ -111,14 +111,16 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 			sliders_container->Add(slider | flex);
 		}
 
-		auto settings_container = Container::Horizontal({
-			IntegerControl(&dsp->plaits_voices[t].pitch, 1, 0, 96.f),
-			FloatControl(&dsp->plaits_voices[t].patch.harmonics),
-			FloatControl(&dsp->plaits_voices[t].patch.timbre),
-			FloatControl(&dsp->plaits_voices[t].patch.morph),
-			IntegerControl(&dsp->track_sequencers[t].length, 1, 2, 10),
-			Dropdown(&engines, &dsp->plaits_voices[t].patch.engine),
-		});
+		auto settings_container = Container::Horizontal(
+			{IntegerControl(&dsp->plaits_voices[t].pitch, 1, 0, 96.f),
+			 FloatControl(&dsp->plaits_voices[t].patch.harmonics),
+			 FloatControl(&dsp->plaits_voices[t].patch.timbre),
+			 FloatControl(&dsp->plaits_voices[t].patch.morph),
+			 IntegerControl(&dsp->track_sequencers[t].length, 1, 2, 10),
+			 Dropdown(&engines, &dsp->plaits_voices[t].patch.engine),
+			 Checkbox("pitch", &dsp->plaits_voices[t].global_pitch_enabled),
+			 Checkbox("octave", &dsp->plaits_voices[t].global_octave_enabled),
+			 Checkbox("velocity", &dsp->plaits_voices[t].global_velocity_enabled)});
 
 		auto track_container = Container::Vertical(
 			{sliders_container | border | flex, settings_container | flex});
