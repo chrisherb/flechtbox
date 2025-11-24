@@ -1,5 +1,6 @@
 #include "dsp.hpp"
 #include "clock.hpp"
+#include "sequencer.hpp"
 #include <array>
 
 float plaits::kSampleRate = SAMPLERATE;
@@ -10,7 +11,10 @@ void dsp_init(std::shared_ptr<flechtbox_dsp> dsp)
 {
 	dsp->clock.samplerate = SAMPLERATE;
 
-	for (int i = 0; i < NUM_TRACKS; i++) { plaits_voice_init(dsp->plaits_voices[i]); }
+	for (int i = 0; i < NUM_TRACKS; i++) {
+		plaits_voice_init(dsp->plaits_voices[i]);
+		track_seq_init(dsp->track_sequencers[i]);
+	}
 }
 
 void plaits_voice_init(plaits_voice& p)

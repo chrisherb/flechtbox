@@ -15,6 +15,7 @@ const int BLOCKSIZE = 512;
 const int PLAITS_BLOCKSIZE = 16;
 
 const int NUM_TRACKS = 9;
+const int NUM_STEPS = 10;
 
 struct plaits_voice {
 	plaits::Patch patch;
