@@ -17,7 +17,7 @@ const int PLAITS_BLOCKSIZE = 16;
 const int NUM_TRACKS = 9;
 const int NUM_STEPS = 10;
 
-struct plaits_voice {
+struct flechtbox_track {
 	int pitch = 48;
 
 	bool global_pitch_enabled = true;
@@ -32,9 +32,12 @@ struct plaits_voice {
 	plaits::Voice::Frame* frames;
 
 	char* shared_buffer;
+	bool enabled = true;
+
+	track_seq sequencer;
 };
 
-void plaits_voice_init(plaits_voice& p);
+void plaits_voice_init(flechtbox_track& p);
 
 struct flechtbox_dsp {
 	metronome clock;
@@ -44,8 +47,7 @@ struct flechtbox_dsp {
 	track_seq velocity_sequence;
 	track_seq octave_sequence;
 
-	std::array<track_seq, NUM_TRACKS> track_sequencers {};
-	std::array<plaits_voice, NUM_TRACKS> plaits_voices {};
+	std::array<flechtbox_track, NUM_TRACKS> tracks {};
 
 	std::atomic<bool> should_quit {false};
 };
