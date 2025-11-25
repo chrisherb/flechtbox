@@ -1,6 +1,7 @@
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_base.hpp>
 #include <ftxui/component/component_options.hpp>
+#include <ftxui/component/event.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/direction.hpp>
 #include <ftxui/dom/elements.hpp>
@@ -139,10 +140,20 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 	track_tabs->Add(master_track_container);
 
 	auto main_container = Container::Vertical({top_container, track_tabs});
-
 	auto renderer = Renderer(main_container, [&] {
 		return vbox({top_container->Render(), separator(), track_tabs->Render() | flex,
 					 separator(), blinking_light(dsp)});
+	});
+
+	renderer |= CatchEvent([&](Event event) {
+		// select tabs with keys 1 - 0
+		for (char num = '0'; num <= '9'; num++) {
+			if (event == Event::Character(num)) {
+				tab_selected = (num == '0') ? 9 : (num - '1');
+			}
+		}
+
+		return false;
 	});
 
 	// thread to poll dsp metronome for ui redraws
@@ -151,7 +162,6 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 		bool gate_change = false;
 		while (ui_running) {
 			bool current_gate = dsp.get()->clock.thirtysecond_gate;
-
 			if (current_gate != gate_change) {
 				gate_change = current_gate;
 				screen.RequestAnimationFrame();
