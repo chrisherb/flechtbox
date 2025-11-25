@@ -9,17 +9,17 @@
 #include <memory>
 #include <sstream>
 #include <string>
-#include <vector>
 
 using namespace ftxui;
 
-inline Component FloatControl(float* value_ptr, float step = 0.01f, float min_value = 0.f,
+inline Component FloatControl(float* value_ptr, std::string label = "",
+							  float step = 0.01f, float min_value = 0.f,
 							  float max_value = 1.f,
 							  std::function<std::string(float)> format = nullptr)
 {
 	// Create a focusable renderer by using the (bool focused) lambda variant.
 	// When focused we change the style so it's visible.
-	auto renderer = Renderer([value_ptr, format](bool focused) {
+	auto renderer = Renderer([value_ptr, label, format](bool focused) {
 		if (!value_ptr) {
 			auto e = text("N/A") | hcenter | border;
 			if (focused) e = e | bold | color(Color::Green);
@@ -37,7 +37,7 @@ inline Component FloatControl(float* value_ptr, float step = 0.01f, float min_va
 		auto e = text(s) | hcenter | border;
 		// Visual focus indicator: bold + color the border text when focused.
 		if (focused) e = e | bold | color(Color::Green);
-		return e;
+		return vbox({text(label), e});
 	});
 
 	auto catcher =
@@ -62,13 +62,13 @@ inline Component FloatControl(float* value_ptr, float step = 0.01f, float min_va
 	return Container::Vertical({catcher});
 }
 
-inline Component IntegerControl(int* value_ptr, int step = 1, int min_value = 0,
-								int max_value = 1,
+inline Component IntegerControl(int* value_ptr, std::string label = "", int step = 1,
+								int min_value = 0, int max_value = 1,
 								std::function<std::string(int)> format = nullptr)
 {
 	// Create a focusable renderer by using the (bool focused) lambda variant.
 	// When focused we change the style so it's visible.
-	auto renderer = Renderer([value_ptr, format](bool focused) {
+	auto renderer = Renderer([value_ptr, format, label](bool focused) {
 		if (!value_ptr) {
 			auto e = text("N/A") | hcenter | border;
 			if (focused) e = e | bold | color(Color::Green);
@@ -86,7 +86,7 @@ inline Component IntegerControl(int* value_ptr, int step = 1, int min_value = 0,
 		auto e = text(s) | hcenter | border;
 		// Visual focus indicator: bold + color the border text when focused.
 		if (focused) e = e | bold | color(Color::Green);
-		return e;
+		return vbox({text(label), e});
 	});
 
 	auto catcher =

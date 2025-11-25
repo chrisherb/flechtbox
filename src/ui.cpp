@@ -25,9 +25,32 @@ Element blinking_light(std::shared_ptr<flechtbox_dsp> dsp)
 					: text("○") | color(Color::GrayDark);
 }
 
-const std::vector<std::string> engines = {"1",	"2",  "3",	"4",  "5",	"6",  "7",	"8",
-										  "9",	"10", "11", "12", "13", "14", "15", "16",
-										  "17", "18", "19", "20", "21", "22", "23", "24"};
+const std::vector<std::string> engines = {
+	"classic waveshapes",
+	"phase distortion",
+	"fm 1",
+	"fm 2",
+	"fm 3",
+	"wave terrain",
+	"string machine",
+	"arpeggiator",
+	"virtual analog",
+	"asymmetric triangle",
+	"2 sine waves",
+	"formants",
+	"additive sines",
+	"wavetable",
+	"chords",
+	"speech",
+	"sawtooth swarm",
+	"filtered noise",
+	"dust noise",
+	"rings a",
+	"rings b",
+	"kick",
+	"snare",
+	"hihat",
+};
 
 void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp)
 {
@@ -88,20 +111,31 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 			sliders_container->Add(slider | flex);
 		}
 
-		auto settings_container = Container::Horizontal(
-			{IntegerControl(&dsp->tracks[t].pitch, 1, 0, 96.f),
-			 FloatControl(&dsp->tracks[t].patch.harmonics),
-			 FloatControl(&dsp->tracks[t].patch.timbre),
-			 FloatControl(&dsp->tracks[t].patch.morph),
-			 IntegerControl(&dsp->tracks[t].sequencer.length, 1, 2, 10),
-			 Dropdown(&engines, &dsp->tracks[t].patch.engine),
-			 Checkbox("pitch", &dsp->tracks[t].global_pitch_enabled),
-			 Checkbox("octave", &dsp->tracks[t].global_octave_enabled),
-			 Checkbox("velocity", &dsp->tracks[t].global_velocity_enabled),
-			 Checkbox("mute", &dsp->tracks[t].muted)});
+		auto plaitsctrls_container = Container::Vertical({
+			IntegerControl(&dsp->tracks[t].pitch, "note", 1, 0, 96.f),
+			FloatControl(&dsp->tracks[t].patch.harmonics, "harmonics"),
+			FloatControl(&dsp->tracks[t].patch.timbre, "timbre"),
+			FloatControl(&dsp->tracks[t].patch.morph, "morph"),
+			Dropdown(&engines, &dsp->tracks[t].patch.engine),
+		});
 
-		auto track_container = Container::Vertical(
-			{sliders_container | border | flex, settings_container | flex});
+		auto trackctrls_container =
+			Container::Vertical({IntegerControl(&dsp->tracks[t].sequencer.length,
+												"sequence length", 1, 2, 10),
+								 Checkbox("mute", &dsp->tracks[t].muted)});
+
+		auto globalctrls_container = Container::Vertical({
+			Checkbox("pitch", &dsp->tracks[t].global_pitch_enabled),
+			Checkbox("octave", &dsp->tracks[t].global_octave_enabled),
+			Checkbox("velocity", &dsp->tracks[t].global_velocity_enabled),
+		});
+
+		auto settings_container = Container::Horizontal(
+			{plaitsctrls_container | border | flex, trackctrls_container | border | flex,
+			 globalctrls_container | border | flex});
+
+		auto track_container =
+			Container::Vertical({sliders_container | border | flex, settings_container});
 
 		track_tabs->Add(track_container);
 	}
