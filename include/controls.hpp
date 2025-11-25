@@ -4,9 +4,11 @@
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/direction.hpp>
 #include <ftxui/dom/elements.hpp>
+#include <ftxui/screen/color.hpp>
 #include <iomanip>
 #include <memory>
 #include <sstream>
+#include <string>
 
 using namespace ftxui;
 
@@ -106,4 +108,41 @@ inline Component IntegerControl(int* value_ptr, int step = 1, int min_value = 0,
 
 	// Container makes the control focusable when used in a parent container.
 	return Container::Vertical({catcher});
+}
+
+inline Component StepSlider(int* value_ptr, int step, unsigned int* step_active,
+							int increment = 25, int min_value = 0, int max_value = 100)
+{
+	auto renderer = Renderer([value_ptr, step_active, step](bool focused) {
+		auto g = gaugeUp(*value_ptr / 100.f);
+		auto t = text(std::to_string(step));
+		if (focused) {
+			g = g | color(Color::Green);
+			t = t | color(Color::Green);
+		} else if (step == *step_active) {
+
+			g = g | color(Color::Cyan);
+			t = t | color(Color::Cyan);
+		}
+		// return g;
+		return vbox(g | flex, t);
+	});
+	auto catcher =
+		CatchEvent(renderer, [value_ptr, increment, min_value, max_value](Event event) {
+			if (!value_ptr) return false;
+			if (event == Event::ArrowUp) {
+				int next = *value_ptr + increment;
+				if (next > max_value) next = max_value;
+				if (next != *value_ptr) *value_ptr = next;
+				return true;
+			}
+			if (event == Event::ArrowDown) {
+				int next = *value_ptr - increment;
+				if (next < min_value) next = min_value;
+				if (next != *value_ptr) *value_ptr = next;
+				return true;
+			}
+			return false;
+		});
+	return Container::Vertical({catcher | flex});
 }

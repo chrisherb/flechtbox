@@ -5,6 +5,7 @@
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/direction.hpp>
 #include <ftxui/dom/elements.hpp>
+#include <ftxui/screen/color.hpp>
 #include <memory>
 #include <string>
 #include <vector>
@@ -106,18 +107,9 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 		auto sliders_container = Container::Horizontal({});
 
 		for (int s = 0; s < NUM_STEPS; s++) {
-			auto options =
-				new SliderOption<int>({.value = &dsp->track_sequencers[t].data[s],
-									   .min = 0,
-									   .max = 100,
-									   .increment = 20,
-									   .direction = Direction::Up,
-									   .color_active = Color::Green,
-									   .color_inactive = Color::GrayDark});
-			auto slider = Slider(*options);
-			auto slider_container = Container::Vertical(
-				{slider | flex, Renderer([s] { return text(to_string(s)); })});
-			sliders_container->Add(slider_container | flex);
+			auto slider = StepSlider(&dsp->track_sequencers[t].data[s], s,
+									 &dsp->track_sequencers[t].current_pos);
+			sliders_container->Add(slider | flex);
 		}
 
 		auto settings_container = Container::Horizontal(
