@@ -139,7 +139,7 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 
 	renderer |= CatchEvent([&](Event event) {
 		// start / stop
-		if (event == Event::Return) { dsp->clock.running = !dsp->clock.running; }
+		if (event == Event::F1) { dsp->clock.running = !dsp->clock.running; }
 
 		// select tabs with keys 1 - 0
 		for (char num = '0'; num <= '9'; num++) {
