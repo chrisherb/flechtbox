@@ -62,7 +62,7 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 	auto octave_sliders_container = Container::Horizontal({});
 	for (int s = 0; s < NUM_STEPS; s++) {
 		auto slider = StepSliderBipolar(&dsp->octave_sequence.data[s], s,
-										&dsp->octave_sequence.current_pos, 1, -3, 3);
+										&dsp->octave_sequence.current_pos, 12, -36, 36);
 		octave_sliders_container->Add(slider | flex);
 	}
 	// velocity sliders
