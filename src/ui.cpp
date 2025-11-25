@@ -60,7 +60,9 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 											  .color_active = Color::Green,
 											  .color_inactive = Color::GrayDark});
 		auto slider = Slider(*options);
-		pitch_sliders_container->Add(slider | flex);
+		auto slider_container = Container::Vertical(
+			{slider | flex, Renderer([s] { return text(to_string(s)); })});
+		pitch_sliders_container->Add(slider_container | flex);
 	}
 	// octave sliders
 	auto octave_sliders_container = Container::Horizontal({});
@@ -73,9 +75,11 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 											  .color_active = Color::Green,
 											  .color_inactive = Color::GrayDark});
 		auto slider = Slider(*options);
-		octave_sliders_container->Add(slider | flex);
+		auto slider_container = Container::Vertical(
+			{slider | flex, Renderer([s] { return text(to_string(s)); })});
+		octave_sliders_container->Add(slider_container | flex);
 	}
-	// octave sliders
+	// velocity sliders
 	auto velocity_sliders_container = Container::Horizontal({});
 	for (int s = 0; s < NUM_STEPS; s++) {
 		auto options = new SliderOption<int>({.value = &dsp->velocity_sequence.data[s],
@@ -86,7 +90,9 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 											  .color_active = Color::Green,
 											  .color_inactive = Color::GrayDark});
 		auto slider = Slider(*options);
-		velocity_sliders_container->Add(slider | flex);
+		auto slider_container = Container::Vertical(
+			{slider | flex, Renderer([s] { return text(to_string(s)); })});
+		velocity_sliders_container->Add(slider_container | flex);
 	}
 	auto master_track_container = Container::Vertical({
 		pitch_sliders_container | border | flex,
@@ -108,7 +114,9 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 									   .color_active = Color::Green,
 									   .color_inactive = Color::GrayDark});
 			auto slider = Slider(*options);
-			sliders_container->Add(slider | flex);
+			auto slider_container = Container::Vertical(
+				{slider | flex, Renderer([s] { return text(to_string(s)); })});
+			sliders_container->Add(slider_container | flex);
 		}
 
 		auto settings_container = Container::Horizontal(
