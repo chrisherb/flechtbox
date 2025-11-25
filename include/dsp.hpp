@@ -33,6 +33,9 @@ struct flechtbox_track {
 
 	char* shared_buffer;
 	bool enabled = true;
+	bool muted = false;
+
+	float volume = 1.f;
 
 	track_seq sequencer;
 };

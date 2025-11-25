@@ -97,7 +97,8 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 			 Dropdown(&engines, &dsp->tracks[t].patch.engine),
 			 Checkbox("pitch", &dsp->tracks[t].global_pitch_enabled),
 			 Checkbox("octave", &dsp->tracks[t].global_octave_enabled),
-			 Checkbox("velocity", &dsp->tracks[t].global_velocity_enabled)});
+			 Checkbox("velocity", &dsp->tracks[t].global_velocity_enabled),
+			 Checkbox("mute", &dsp->tracks[t].muted)});
 
 		auto track_container = Container::Vertical(
 			{sliders_container | border | flex, settings_container | flex});
@@ -116,13 +117,22 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 
 	renderer |= CatchEvent([&](Event event) {
 		// start / stop
-		if (event == Event::F1) { dsp->clock.running = !dsp->clock.running; }
+		if (event == Event::F1) {
+			dsp->clock.running = !dsp->clock.running;
+			return true;
+		}
 
 		// select tabs with keys 1 - 0
 		for (char num = '0'; num <= '9'; num++) {
 			if (event == Event::Character(num)) {
 				tab_selected = (num == '0') ? 9 : (num - '1');
+				return true;
 			}
+		}
+
+		// mute selected track
+		if (event == Event::Character('m') && tab_selected <= 9) {
+			dsp->tracks[tab_selected].muted = !dsp->tracks[tab_selected].muted;
 		}
 
 		return false;

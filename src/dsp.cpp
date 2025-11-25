@@ -92,7 +92,7 @@ void dsp_process_block(std::shared_ptr<flechtbox_dsp> dsp, float* out, int frame
 			int step_probability =
 				track_seq_process_step(p.sequencer, dsp->clock.cur_clock_states);
 
-			if (rand_bool(step_probability)) {
+			if (!p.muted && rand_bool(step_probability)) {
 
 				p.patch.note = p.pitch;
 				if (p.global_pitch_enabled) p.patch.note += global_pitch;
@@ -113,7 +113,7 @@ void dsp_process_block(std::shared_ptr<flechtbox_dsp> dsp, float* out, int frame
 			float voice_out = 0.f;
 			for (int t = 0; t < NUM_TRACKS; t++) {
 				auto& p = dsp->tracks[t];
-				voice_out += p.frames[i].out / 32768.0f * p.current_velocity;
+				voice_out += p.frames[i].out / 32768.0f * p.current_velocity * p.volume;
 				// float voice_aux = p.frames[i].aux / 32768.0f;
 			}
 			*out++ += voice_out; /* left */
