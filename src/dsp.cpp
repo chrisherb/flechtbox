@@ -98,7 +98,7 @@ void dsp_process_block(std::shared_ptr<flechtbox_dsp> dsp, float* out, int frame
 				if (p.global_pitch_enabled) p.patch.note += global_pitch;
 				if (p.global_octave_enabled) p.patch.note += global_octave;
 				if (p.global_velocity_enabled)
-					p.current_velocity = global_velocity / 127.f;
+					p.current_velocity = global_velocity / 100.f;
 				else p.current_velocity = 1.f;
 				p.modulations.trigger = 1.f;
 			}

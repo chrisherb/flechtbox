@@ -54,47 +54,23 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 	// pitch sliders
 	auto pitch_sliders_container = Container::Horizontal({});
 	for (int s = 0; s < NUM_STEPS; s++) {
-		auto options = new SliderOption<int>({.value = &dsp->pitch_sequence.data[s],
-											  .min = -12,
-											  .max = 12,
-											  .increment = 1,
-											  .direction = Direction::Up,
-											  .color_active = Color::Green,
-											  .color_inactive = Color::GrayDark});
-		auto slider = Slider(*options);
-		auto slider_container = Container::Vertical(
-			{slider | flex, Renderer([s] { return text(to_string(s)); })});
-		pitch_sliders_container->Add(slider_container | flex);
+		auto slider = StepSliderBipolar(&dsp->pitch_sequence.data[s], s,
+										&dsp->pitch_sequence.current_pos, 1, -12, 12);
+		pitch_sliders_container->Add(slider | flex);
 	}
 	// octave sliders
 	auto octave_sliders_container = Container::Horizontal({});
 	for (int s = 0; s < NUM_STEPS; s++) {
-		auto options = new SliderOption<int>({.value = &dsp->octave_sequence.data[s],
-											  .min = -3,
-											  .max = 3,
-											  .increment = 1,
-											  .direction = Direction::Up,
-											  .color_active = Color::Green,
-											  .color_inactive = Color::GrayDark});
-		auto slider = Slider(*options);
-		auto slider_container = Container::Vertical(
-			{slider | flex, Renderer([s] { return text(to_string(s)); })});
-		octave_sliders_container->Add(slider_container | flex);
+		auto slider = StepSliderBipolar(&dsp->octave_sequence.data[s], s,
+										&dsp->octave_sequence.current_pos, 1, -3, 3);
+		octave_sliders_container->Add(slider | flex);
 	}
 	// velocity sliders
 	auto velocity_sliders_container = Container::Horizontal({});
 	for (int s = 0; s < NUM_STEPS; s++) {
-		auto options = new SliderOption<int>({.value = &dsp->velocity_sequence.data[s],
-											  .min = 0,
-											  .max = 127,
-											  .increment = 32,
-											  .direction = Direction::Up,
-											  .color_active = Color::Green,
-											  .color_inactive = Color::GrayDark});
-		auto slider = Slider(*options);
-		auto slider_container = Container::Vertical(
-			{slider | flex, Renderer([s] { return text(to_string(s)); })});
-		velocity_sliders_container->Add(slider_container | flex);
+		auto slider = StepSlider(&dsp->velocity_sequence.data[s], s,
+								 &dsp->velocity_sequence.current_pos, 10);
+		velocity_sliders_container->Add(slider | flex);
 	}
 	auto master_track_container = Container::Vertical({
 		pitch_sliders_container | border | flex,
@@ -134,7 +110,8 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 	auto main_container = Container::Vertical({top_container, track_tabs});
 	auto renderer = Renderer(main_container, [&] {
 		return vbox({top_container->Render(), separator(), track_tabs->Render() | flex,
-					 separator(), blinking_light(dsp)});
+					 separator(), blinking_light(dsp)}) |
+			   border;
 	});
 
 	renderer |= CatchEvent([&](Event event) {

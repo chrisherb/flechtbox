@@ -9,6 +9,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <vector>
 
 using namespace ftxui;
 
@@ -113,8 +114,8 @@ inline Component IntegerControl(int* value_ptr, int step = 1, int min_value = 0,
 inline Component StepSlider(int* value_ptr, int step, unsigned int* step_active,
 							int increment = 25, int min_value = 0, int max_value = 100)
 {
-	auto renderer = Renderer([value_ptr, step_active, step](bool focused) {
-		auto g = gaugeUp(*value_ptr / 100.f);
+	auto renderer = Renderer([value_ptr, step_active, step, max_value](bool focused) {
+		auto g = gaugeUp(*value_ptr / static_cast<float>(max_value));
 		auto t = text(std::to_string(step + 1));
 		if (focused) {
 			g = g | color(Color::Green);
@@ -123,9 +124,60 @@ inline Component StepSlider(int* value_ptr, int step, unsigned int* step_active,
 			g = g | color(Color::Cyan);
 			t = t | color(Color::Cyan);
 		}
-		// return g;
 		return vbox(g | flex, t);
 	});
+	auto catcher =
+		CatchEvent(renderer, [value_ptr, increment, min_value, max_value](Event event) {
+			if (!value_ptr) return false;
+			if (event == Event::ArrowUp) {
+				int next = *value_ptr + increment;
+				if (next > max_value) next = max_value;
+				if (next != *value_ptr) *value_ptr = next;
+				return true;
+			}
+			if (event == Event::ArrowDown) {
+				int next = *value_ptr - increment;
+				if (next < min_value) next = min_value;
+				if (next != *value_ptr) *value_ptr = next;
+				return true;
+			}
+			return false;
+		});
+	return Container::Vertical({catcher | flex});
+}
+
+inline Component StepSliderBipolar(int* value_ptr, int step, unsigned int* step_active,
+								   int increment = 25, int min_value = 0,
+								   int max_value = 100)
+{
+	auto renderer =
+		Renderer([value_ptr, step_active, step, min_value, max_value](bool focused) {
+			float val_pos = 0.f;
+			float val_neg = 0.f;
+
+			if (*value_ptr > 0) val_pos = *value_ptr / (float)max_value;
+			else if (*value_ptr < 0) val_neg = *value_ptr / (float)min_value;
+
+			auto g_up = gaugeUp(val_pos);
+			auto g_do = gaugeDown(val_neg);
+
+			auto label = text(std::to_string(step + 1));
+			auto divider = text("—");
+
+			if (focused) {
+				g_up = g_up | color(Color::Green);
+				g_do = g_do | color(Color::Green);
+				label = label | color(Color::Green);
+				divider = divider | color(Color::Green);
+			} else if (step == *step_active) {
+				g_up = g_up | color(Color::Cyan);
+				g_do = g_do | color(Color::Cyan);
+				label = label | color(Color::Cyan);
+				divider = divider | color(Color::Cyan);
+			}
+			return vbox(g_up | flex, divider, g_do | flex, label);
+		});
+
 	auto catcher =
 		CatchEvent(renderer, [value_ptr, increment, min_value, max_value](Event event) {
 			if (!value_ptr) return false;
