@@ -115,12 +115,11 @@ inline Component StepSlider(int* value_ptr, int step, unsigned int* step_active,
 {
 	auto renderer = Renderer([value_ptr, step_active, step](bool focused) {
 		auto g = gaugeUp(*value_ptr / 100.f);
-		auto t = text(std::to_string(step));
+		auto t = text(std::to_string(step + 1));
 		if (focused) {
 			g = g | color(Color::Green);
 			t = t | color(Color::Green);
 		} else if (step == *step_active) {
-
 			g = g | color(Color::Cyan);
 			t = t | color(Color::Cyan);
 		}
