@@ -2,6 +2,8 @@
 
 Terminal-based groovebox.
 
+![flechtbox screenshot](screenshot.png)
+
 ## features
 
 - 9 tracks with probability-based step sequencers
