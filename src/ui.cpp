@@ -130,18 +130,24 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 			sliders_container->Add(slider | flex);
 		}
 
+		auto lgp_ctrls = Container::Horizontal({
+			FloatControl(&dsp->tracks[t].patch.decay, "decay") | flex,
+			FloatControl(&dsp->tracks[t].patch.lpg_colour, "color") | flex,
+		});
+
 		auto plaitsctrls_container = Container::Vertical({
-			IntegerControl(&dsp->tracks[t].pitch, "note", 1, 0, 96.f),
 			FloatControl(&dsp->tracks[t].patch.harmonics, "harmonics"),
 			FloatControl(&dsp->tracks[t].patch.timbre, "timbre"),
 			FloatControl(&dsp->tracks[t].patch.morph, "morph"),
+			lgp_ctrls,
 			Dropdown(&engines, &dsp->tracks[t].patch.engine),
 		});
 
-		auto trackctrls_container =
-			Container::Vertical({IntegerControl(&dsp->tracks[t].sequencer.length,
-												"sequence length", 1, 2, 10),
-								 Checkbox("mute", &dsp->tracks[t].muted)});
+		auto trackctrls_container = Container::Vertical(
+			{IntegerControl(&dsp->tracks[t].sequencer.length, "sequence length", 1, 2,
+							10),
+			 IntegerControl(&dsp->tracks[t].pitch, "root note", 1, 0, 96.f),
+			 Checkbox("mute", &dsp->tracks[t].muted)});
 
 		auto globalctrls_container = Container::Vertical({
 			Checkbox("pitch", &dsp->tracks[t].global_pitch_enabled),
