@@ -12,6 +12,16 @@
 
 using namespace ftxui;
 
+inline bool is_event_increase(Event event)
+{
+	return event == Event::ArrowUpCtrl || event == Event::Character('K');
+}
+
+inline bool is_event_decrease(Event event)
+{
+	return event == Event::ArrowDownCtrl || event == Event::Character('J');
+}
+
 inline Component Light(bool* light_on)
 {
 	auto renderer = Renderer([light_on] {
@@ -65,13 +75,13 @@ inline Component FloatControl(float* value_ptr, std::string label = "",
 	auto catcher =
 		CatchEvent(renderer, [value_ptr, step, min_value, max_value](Event event) {
 			if (!value_ptr) return false;
-			if (event == Event::ArrowUp) {
+			if (is_event_increase(event)) {
 				float next = *value_ptr + step;
 				if (next > max_value) next = max_value;
 				if (next != *value_ptr) *value_ptr = next;
 				return true;
 			}
-			if (event == Event::ArrowDown) {
+			if (is_event_decrease(event)) {
 				float next = *value_ptr - step;
 				if (next < min_value) next = min_value;
 				if (next != *value_ptr) *value_ptr = next;
@@ -119,13 +129,13 @@ inline Component IntegerControl(int* value_ptr, std::string label = "", int step
 	auto catcher =
 		CatchEvent(renderer, [value_ptr, step, min_value, max_value](Event event) {
 			if (!value_ptr) return false;
-			if (event == Event::ArrowUp) {
+			if (is_event_increase(event)) {
 				int next = *value_ptr + step;
 				if (next > max_value) next = max_value;
 				if (next != *value_ptr) *value_ptr = next;
 				return true;
 			}
-			if (event == Event::ArrowDown) {
+			if (is_event_decrease(event)) {
 				int next = *value_ptr - step;
 				if (next < min_value) next = min_value;
 				if (next != *value_ptr) *value_ptr = next;
@@ -156,13 +166,13 @@ inline Component StepSlider(int* value_ptr, int step, unsigned int* step_active,
 	auto catcher =
 		CatchEvent(renderer, [value_ptr, increment, min_value, max_value](Event event) {
 			if (!value_ptr) return false;
-			if (event == Event::ArrowUp) {
+			if (is_event_increase(event)) {
 				int next = *value_ptr + increment;
 				if (next > max_value) next = max_value;
 				if (next != *value_ptr) *value_ptr = next;
 				return true;
 			}
-			if (event == Event::ArrowDown) {
+			if (is_event_decrease(event)) {
 				int next = *value_ptr - increment;
 				if (next < min_value) next = min_value;
 				if (next != *value_ptr) *value_ptr = next;
@@ -208,13 +218,13 @@ inline Component StepSliderBipolar(int* value_ptr, int step, unsigned int* step_
 	auto catcher =
 		CatchEvent(renderer, [value_ptr, increment, min_value, max_value](Event event) {
 			if (!value_ptr) return false;
-			if (event == Event::ArrowUp) {
+			if (is_event_increase(event)) {
 				int next = *value_ptr + increment;
 				if (next > max_value) next = max_value;
 				if (next != *value_ptr) *value_ptr = next;
 				return true;
 			}
-			if (event == Event::ArrowDown) {
+			if (is_event_decrease(event)) {
 				int next = *value_ptr - increment;
 				if (next < min_value) next = min_value;
 				if (next != *value_ptr) *value_ptr = next;
