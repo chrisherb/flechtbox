@@ -25,6 +25,7 @@ Uses [PortAudio](https://github.com/PortAudio/portaudio) and [FTXUI](https://git
 ## how to control
 
 To navigate between controls, use either the arrow keys or hjkl.
+
 To manipulate parameters, use ctrl+up/down or K/J.
 
 Other keybinds:
