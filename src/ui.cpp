@@ -59,8 +59,11 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 	int tab_selected = 0;
 	auto tab_toggle = Toggle(&tab_values, &tab_selected);
 	auto start_btn = Checkbox("run", &dsp->clock.running);
-	auto transport_ctrls = Container::Horizontal({start_btn});
-	auto top_container = Container::Horizontal({tab_toggle, transport_ctrls});
+	auto tempo_ctrl = FloatControl(&dsp->clock.tempo, "bpm:", 1.f, 20.f, 250.f,
+								   {.horizontal = true, .border = false});
+	auto blinkenlight = Light(&dsp->clock.quarter_gate);
+	auto transport_ctrls = Container::Horizontal({tempo_ctrl, start_btn, blinkenlight});
+	auto top_container = Container::Horizontal({tab_toggle | flex, transport_ctrls});
 
 	////////////////////
 	// MAIN CONTAINER //
@@ -172,12 +175,13 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 
 	track_tabs->Add(master_track_container);
 
-	auto tempo_ctrl = FloatControl(&dsp->clock.tempo, "bpm", 1.f, 20.f, 250.f);
-
 	auto main_container = Container::Vertical({top_container, track_tabs});
-	auto renderer = Renderer(main_container, [&top_container, &track_tabs, &dsp] {
-		return vbox({top_container->Render(), separator(), track_tabs->Render() | flex,
-					 separator(), Light(&dsp->clock.quarter_gate)->Render()}) |
+	auto renderer = Renderer(main_container, [&top_container, &track_tabs] {
+		return vbox({
+				   top_container->Render(),
+				   separator(),
+				   track_tabs->Render() | flex,
+			   }) |
 			   border;
 	});
 

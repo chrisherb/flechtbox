@@ -1,4 +1,3 @@
-#include "dsp.hpp"
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_base.hpp>
 #include <ftxui/component/component_options.hpp>
@@ -15,23 +14,30 @@ using namespace ftxui;
 
 inline Component Light(bool* light_on)
 {
-	auto renderer = Renderer([&light_on] {
+	auto renderer = Renderer([light_on] {
 		// Read the DSP state
-		return *light_on ? text("●") | color(Color::Green)
-						 : text("○") | color(Color::GrayDark);
+		return *light_on ? text(" ● ") | color(Color::Green)
+						 : text(" ○ ") | color(Color::GrayDark);
 	});
+
+	auto catcher = CatchEvent(renderer, [](Event event) { return false; });
 
 	return Container::Vertical({renderer});
 }
 
+struct ControlOptions {
+	bool horizontal = false;
+	bool border = true;
+};
+
 inline Component FloatControl(float* value_ptr, std::string label = "",
 							  float step = 0.01f, float min_value = 0.f,
-							  float max_value = 1.f,
+							  float max_value = 1.f, ControlOptions options = {},
 							  std::function<std::string(float)> format = nullptr)
 {
 	// Create a focusable renderer by using the (bool focused) lambda variant.
 	// When focused we change the style so it's visible.
-	auto renderer = Renderer([value_ptr, label, format](bool focused) {
+	auto renderer = Renderer([value_ptr, label, format, options](bool focused) {
 		if (!value_ptr) {
 			auto e = text("N/A") | hcenter | border;
 			if (focused) e = e | bold | color(Color::Green);
@@ -46,10 +52,14 @@ inline Component FloatControl(float* value_ptr, std::string label = "",
 			os << std::fixed << std::setprecision(2) << *value_ptr;
 			s = os.str();
 		}
-		auto e = text(s) | hcenter | border;
+		auto e = text(s) | hcenter;
+		if (options.border) e = e | border;
 		// Visual focus indicator: bold + color the border text when focused.
 		if (focused) e = e | bold | color(Color::Green);
-		return vbox({text(label), e});
+
+		if (options.horizontal)
+			return hbox({text(label) | vcenter, text(" "), e, text(" ")});
+		else return vbox({text(label), e});
 	});
 
 	auto catcher =
@@ -76,11 +86,12 @@ inline Component FloatControl(float* value_ptr, std::string label = "",
 
 inline Component IntegerControl(int* value_ptr, std::string label = "", int step = 1,
 								int min_value = 0, int max_value = 1,
+								ControlOptions options = {},
 								std::function<std::string(int)> format = nullptr)
 {
 	// Create a focusable renderer by using the (bool focused) lambda variant.
 	// When focused we change the style so it's visible.
-	auto renderer = Renderer([value_ptr, format, label](bool focused) {
+	auto renderer = Renderer([value_ptr, format, label, options](bool focused) {
 		if (!value_ptr) {
 			auto e = text("N/A") | hcenter | border;
 			if (focused) e = e | bold | color(Color::Green);
@@ -96,9 +107,13 @@ inline Component IntegerControl(int* value_ptr, std::string label = "", int step
 			s = os.str();
 		}
 		auto e = text(s) | hcenter | border;
+		if (options.border) e = e | border;
 		// Visual focus indicator: bold + color the border text when focused.
 		if (focused) e = e | bold | color(Color::Green);
-		return vbox({text(label), e});
+
+		if (options.horizontal)
+			return hbox({text(label) | vcenter, text(" "), e, text(" ")});
+		else return vbox({text(label) | vcenter, e});
 	});
 
 	auto catcher =
