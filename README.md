@@ -63,3 +63,6 @@ run (from build folder):
 ```bash
 ./flechtbox
 ```
+## donate
+
+If you want to support my work, please consider to [buy me a Sandwich 🥪](https://trnr.gumroad.com/coffee).
