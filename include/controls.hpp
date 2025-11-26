@@ -1,3 +1,4 @@
+#include "dsp.hpp"
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_base.hpp>
 #include <ftxui/component/component_options.hpp>
@@ -11,6 +12,17 @@
 #include <string>
 
 using namespace ftxui;
+
+inline Component Light(bool* light_on)
+{
+	auto renderer = Renderer([&light_on] {
+		// Read the DSP state
+		return *light_on ? text("●") | color(Color::Green)
+						 : text("○") | color(Color::GrayDark);
+	});
+
+	return Container::Vertical({renderer});
+}
 
 inline Component FloatControl(float* value_ptr, std::string label = "",
 							  float step = 0.01f, float min_value = 0.f,

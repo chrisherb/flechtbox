@@ -17,14 +17,6 @@
 using namespace ftxui;
 using namespace std;
 
-Element blinking_light(std::shared_ptr<flechtbox_dsp> dsp)
-{
-	// Read the DSP state
-	bool light_on = dsp->clock.quarter_gate;
-	return light_on ? text("●") | color(Color::Green)
-					: text("○") | color(Color::GrayDark);
-}
-
 const std::vector<std::string> engines = {
 	"classic waveshapes",
 	"phase distortion",
@@ -180,10 +172,12 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 
 	track_tabs->Add(master_track_container);
 
+	auto tempo_ctrl = FloatControl(&dsp->clock.tempo, "bpm", 1.f, 20.f, 250.f);
+
 	auto main_container = Container::Vertical({top_container, track_tabs});
-	auto renderer = Renderer(main_container, [&] {
+	auto renderer = Renderer(main_container, [&top_container, &track_tabs, &dsp] {
 		return vbox({top_container->Render(), separator(), track_tabs->Render() | flex,
-					 separator(), blinking_light(dsp)}) |
+					 separator(), Light(&dsp->clock.quarter_gate)->Render()}) |
 			   border;
 	});
 
