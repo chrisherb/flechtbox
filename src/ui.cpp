@@ -52,6 +52,9 @@ const std::vector<std::string> engines = {
 	"hihat",
 };
 
+const std::vector<std::string> pb_directions = {"forward", "backward", "pendulum",
+												"random"};
+
 void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp)
 {
 	std::vector<std::string> tab_values {
@@ -83,7 +86,10 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 	}
 	auto pitch_length_ctrl =
 		IntegerControl(&dsp->pitch_sequence.length, "length", 1, 2, 10);
-	auto pitch_settings_container = Container::Vertical({pitch_length_ctrl});
+	auto pitch_settings_container = Container::Vertical({
+		pitch_length_ctrl,
+		Dropdown(&pb_directions, &dsp->pitch_sequence.playback_dir),
+	});
 	auto master_pitch_container = Container::Horizontal(
 		{pitch_sliders_container | flex | border, pitch_settings_container | border});
 
@@ -96,7 +102,10 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 	}
 	auto octave_length_ctrl =
 		IntegerControl(&dsp->octave_sequence.length, "length", 1, 2, 10);
-	auto octave_settings_container = Container::Vertical({octave_length_ctrl});
+	auto octave_settings_container = Container::Vertical({
+		octave_length_ctrl,
+		Dropdown(&pb_directions, &dsp->octave_sequence.playback_dir),
+	});
 	auto master_octave_container = Container::Horizontal(
 		{octave_sliders_container | flex | border, octave_settings_container | border});
 
@@ -109,7 +118,10 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 	}
 	auto velocity_length_ctrl =
 		IntegerControl(&dsp->velocity_sequence.length, "length", 1, 2, 10);
-	auto velocity_settings_container = Container::Vertical({velocity_length_ctrl});
+	auto velocity_settings_container = Container::Vertical({
+		velocity_length_ctrl,
+		Dropdown(&pb_directions, &dsp->velocity_sequence.playback_dir),
+	});
 	auto master_velocity_container =
 		Container::Horizontal({velocity_sliders_container | flex | border,
 							   velocity_settings_container | border});
@@ -146,6 +158,7 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 		auto trackctrls_container = Container::Vertical(
 			{IntegerControl(&dsp->tracks[t].sequencer.length, "sequence length", 1, 2,
 							10),
+			 Dropdown(&pb_directions, &dsp->tracks[t].sequencer.playback_dir),
 			 IntegerControl(&dsp->tracks[t].pitch, "root note", 1, 0, 96.f),
 			 Checkbox("mute", &dsp->tracks[t].muted)});
 
