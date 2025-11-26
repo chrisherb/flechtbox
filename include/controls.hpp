@@ -38,8 +38,7 @@ inline Component Light(bool* light_on)
 {
 	auto renderer = Renderer([light_on] {
 		// Read the DSP state
-		return *light_on ? text(" ● ") | color(Color::Green)
-						 : text(" ○ ") | color(Color::GrayDark);
+		return *light_on ? text(" ● ") : text(" ○ ");
 	});
 
 	auto catcher = CatchEvent(renderer, [](Event event) { return false; });
