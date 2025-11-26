@@ -106,7 +106,7 @@ inline Component IntegerControl(int* value_ptr, std::string label = "", int step
 			os << std::fixed << *value_ptr;
 			s = os.str();
 		}
-		auto e = text(s) | hcenter | border;
+		auto e = text(s) | hcenter;
 		if (options.border) e = e | border;
 		// Visual focus indicator: bold + color the border text when focused.
 		if (focused) e = e | bold | color(Color::Green);
