@@ -116,8 +116,8 @@ void dsp_process_block(std::shared_ptr<flechtbox_dsp> dsp, float* out, int frame
 				voice_out += p.frames[i].out / 32768.0f * p.current_velocity * p.volume;
 				// float voice_aux = p.frames[i].aux / 32768.0f;
 			}
-			*out++ += voice_out; /* left */
-			*out++ += voice_out; /* right */
+			*out++ = soft_clip(voice_out); /* left */
+			*out++ = soft_clip(voice_out); /* right */
 		}
 	}
 }

@@ -58,3 +58,14 @@ struct flechtbox_dsp {
 void dsp_init(std::shared_ptr<flechtbox_dsp> dsp);
 
 void dsp_process_block(std::shared_ptr<flechtbox_dsp> dsp, float* out, int frames);
+
+inline float soft_clip(float x)
+{
+	if (x < -3.f) {
+		return -1.f;
+	} else if (x > 3.f) {
+		return 1.f;
+	} else {
+		return x * (27.f + x * x) / (27.f + 9.f * x * x);
+	}
+}
