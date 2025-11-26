@@ -74,13 +74,19 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 	auto track_tabs = Container::Tab({}, &tab_selected);
 
 	// MASTER TRACK
-	// pitch sliders
+	// pitch sequencer
 	auto pitch_sliders_container = Container::Horizontal({});
 	for (int s = 0; s < NUM_STEPS; s++) {
 		auto slider = StepSliderBipolar(&dsp->pitch_sequence.data[s], s,
 										&dsp->pitch_sequence.current_pos, 1, -12, 12);
 		pitch_sliders_container->Add(slider | flex);
 	}
+	auto pitch_length_ctrl =
+		IntegerControl(&dsp->pitch_sequence.length, "length", 1, 2, 10);
+	auto pitch_settings_container = Container::Vertical({pitch_length_ctrl});
+	auto master_pitch_container = Container::Horizontal(
+		{pitch_sliders_container | flex | border, pitch_settings_container | border});
+
 	// octave sliders
 	auto octave_sliders_container = Container::Horizontal({});
 	for (int s = 0; s < NUM_STEPS; s++) {
@@ -88,6 +94,12 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 										&dsp->octave_sequence.current_pos, 12, -36, 36);
 		octave_sliders_container->Add(slider | flex);
 	}
+	auto octave_length_ctrl =
+		IntegerControl(&dsp->octave_sequence.length, "length", 1, 2, 10);
+	auto octave_settings_container = Container::Vertical({octave_length_ctrl});
+	auto master_octave_container = Container::Horizontal(
+		{octave_sliders_container | flex | border, octave_settings_container | border});
+
 	// velocity sliders
 	auto velocity_sliders_container = Container::Horizontal({});
 	for (int s = 0; s < NUM_STEPS; s++) {
@@ -95,10 +107,17 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 								 &dsp->velocity_sequence.current_pos, 10);
 		velocity_sliders_container->Add(slider | flex);
 	}
+	auto velocity_length_ctrl =
+		IntegerControl(&dsp->velocity_sequence.length, "length", 1, 2, 10);
+	auto velocity_settings_container = Container::Vertical({velocity_length_ctrl});
+	auto master_velocity_container =
+		Container::Horizontal({velocity_sliders_container | flex | border,
+							   velocity_settings_container | border});
+
 	auto master_track_container = Container::Vertical({
-		pitch_sliders_container | border | flex,
-		octave_sliders_container | border | flex,
-		velocity_sliders_container | border | flex,
+		master_pitch_container | flex,
+		master_octave_container | flex,
+		master_velocity_container | flex,
 	});
 
 	// SLAVE TRACKS
