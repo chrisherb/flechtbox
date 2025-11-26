@@ -27,7 +27,7 @@ void plaits_voice_init(flechtbox_track& p)
 	stmlib::BufferAllocator allocator(p.shared_buffer, PLAITS_BLOCKSIZE * 1024);
 	p.voice->Init(&allocator);
 
-	p.patch.engine = 14;
+	p.patch.engine = 8;
 	p.patch.note = 48.0f;
 	p.patch.harmonics = 0.5f;
 	p.patch.timbre = 0.5f;
