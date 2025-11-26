@@ -16,45 +16,47 @@ enum clock_division {
 struct metronome {
 	double samplerate = 48000;
 	float tempo = 120.f;
-
 	bool running = false;
-	bool quarter_gate = false;		// for the blinkenlights
-	bool thirtysecond_gate = false; // for ui redraw
+	bool quarter_gate = false;
+	bool thirtysecond_gate = false;
 
-	unsigned long count = 0;
-
-	std::array<bool, CL_NUM_CLOCK_DIVISIONS> cur_clock_states;
+	std::array<double, CL_NUM_CLOCK_DIVISIONS> phases = {0.0}; // For each clock
+	std::array<bool, CL_NUM_CLOCK_DIVISIONS> cur_clock_states = {false};
 };
 
 inline void clock_process_block(metronome& c, int frames)
 {
-	// reset
-	c.cur_clock_states[CL_WHOLE] = false;
-	c.cur_clock_states[CL_HALF] = false;
-	c.cur_clock_states[CL_QUARTER] = false;
-	c.cur_clock_states[CL_EIGHTH] = false;
-	c.cur_clock_states[CL_SIXTEENTH] = false;
-	c.cur_clock_states[CL_THIRTYSECOND] = false;
-
 	if (!c.running) return;
 
-	for (int i = 0; i < frames; i++) {
-		int q_smp = (60.f / c.tempo) * c.samplerate;
+	// Division multipliers (relative to quarter note)
+	static constexpr double division_multiplier[CL_NUM_CLOCK_DIVISIONS] = {
+		1.0 / 4.0, // whole note
+		1.0 / 2.0, // half note
+		1.0,	   // quarter note
+		2.0,	   // eighth
+		4.0,	   // sixteenth
+		8.0		   // thirtysecond
+	};
 
-		// Prevent division by zero
-		if (q_smp) {
-			// determine clock states
-			if (c.count % (q_smp * 4) == 0) c.cur_clock_states[CL_WHOLE] = true;
-			if (c.count % (q_smp * 2) == 0) c.cur_clock_states[CL_HALF] = true;
-			if (c.count % q_smp == 0) c.cur_clock_states[CL_QUARTER] = true;
-			if (c.count % (q_smp / 2) == 0) c.cur_clock_states[CL_EIGHTH] = true;
-			if (c.count % (q_smp / 4) == 0) c.cur_clock_states[CL_SIXTEENTH] = true;
-			if (c.count % (q_smp / 8) == 0) c.cur_clock_states[CL_THIRTYSECOND] = true;
+	for (int div = 0; div < CL_NUM_CLOCK_DIVISIONS; ++div)
+		c.cur_clock_states[div] = false;
 
-			c.quarter_gate = c.count % q_smp < (q_smp / 2);
-			c.thirtysecond_gate = c.count % (q_smp / 8) < (q_smp / 16);
+	for (int i = 0; i < frames; ++i) {
+		for (int div = 0; div < CL_NUM_CLOCK_DIVISIONS; ++div) {
+			// Calculate frequency (beats per second)
+			double bps = (c.tempo / 60.0) * division_multiplier[div];
+			double phase_inc = bps / c.samplerate;
+			c.phases[div] += phase_inc;
+			if (c.phases[div] >= 1.0) {
+				c.phases[div] -= 1.0;
+				c.cur_clock_states[div] = true;
+			}
 		}
 
-		c.count++;
+		// gates for visualization
+		double quarter_phase = c.phases[CL_QUARTER];
+		double thirty_second_phase = c.phases[CL_THIRTYSECOND];
+		c.quarter_gate = (quarter_phase < 0.5);
+		c.thirtysecond_gate = (thirty_second_phase < 0.5);
 	}
 }
