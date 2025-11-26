@@ -76,7 +76,8 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 	auto pitch_sliders_container = Container::Horizontal({});
 	for (int s = 0; s < NUM_STEPS; s++) {
 		auto slider = StepSliderBipolar(&dsp->pitch_sequence.data[s], s,
-										&dsp->pitch_sequence.current_pos, 1, -12, 12);
+										&dsp->pitch_sequence.current_pos,
+										&dsp->pitch_sequence.length, 1, -12, 12);
 		pitch_sliders_container->Add(slider | flex);
 	}
 	auto pitch_length_ctrl =
@@ -92,7 +93,8 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 	auto octave_sliders_container = Container::Horizontal({});
 	for (int s = 0; s < NUM_STEPS; s++) {
 		auto slider = StepSliderBipolar(&dsp->octave_sequence.data[s], s,
-										&dsp->octave_sequence.current_pos, 12, -36, 36);
+										&dsp->octave_sequence.current_pos,
+										&dsp->octave_sequence.length, 12, -36, 36);
 		octave_sliders_container->Add(slider | flex);
 	}
 	auto octave_length_ctrl =
@@ -108,7 +110,8 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 	auto velocity_sliders_container = Container::Horizontal({});
 	for (int s = 0; s < NUM_STEPS; s++) {
 		auto slider = StepSlider(&dsp->velocity_sequence.data[s], s,
-								 &dsp->velocity_sequence.current_pos, 10);
+								 &dsp->velocity_sequence.current_pos,
+								 &dsp->velocity_sequence.length, 10);
 		velocity_sliders_container->Add(slider | flex);
 	}
 	auto velocity_length_ctrl =
@@ -133,7 +136,8 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 
 		for (int s = 0; s < NUM_STEPS; s++) {
 			auto slider = StepSlider(&dsp->tracks[t].sequencer.data[s], s,
-									 &dsp->tracks[t].sequencer.current_pos, 20);
+									 &dsp->tracks[t].sequencer.current_pos,
+									 &dsp->tracks[t].sequencer.length, 20);
 			sliders_container->Add(slider | flex);
 		}
 

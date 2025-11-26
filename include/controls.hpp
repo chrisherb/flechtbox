@@ -149,20 +149,26 @@ inline Component IntegerControl(int* value_ptr, std::string label = "", int step
 }
 
 inline Component StepSlider(int* value_ptr, int step, unsigned int* step_active,
-							int increment = 25, int min_value = 0, int max_value = 100)
+							int* sequence_length, int increment = 25, int min_value = 0,
+							int max_value = 100)
 {
-	auto renderer = Renderer([value_ptr, step_active, step, max_value](bool focused) {
-		auto g = gaugeUp(*value_ptr / static_cast<float>(max_value));
-		auto t = text(std::to_string(step + 1));
-		if (focused) {
-			g = g | color(Color::Green);
-			t = t | color(Color::Green);
-		} else if (step == *step_active) {
-			g = g | color(Color::Cyan);
-			t = t | color(Color::Cyan);
-		}
-		return vbox(g | flex, t);
-	});
+	auto renderer = Renderer(
+		[value_ptr, step_active, step, max_value, sequence_length](bool focused) {
+			auto g1 = gaugeUp(*value_ptr / static_cast<float>(max_value));
+			auto t = text(std::to_string(step + 1));
+			auto gauge_box = hbox(g1) | border;
+
+			if (focused) {
+				t = t | color(Color::Green);
+				gauge_box = gauge_box | color(Color::Green);
+			}
+			if (step == *step_active) { t = t | color(Color::Cyan) | underlined; }
+			if (step >= *sequence_length) {
+				t = t | color(Color::GrayDark);
+				gauge_box = gauge_box | color(Color::GrayDark);
+			}
+			return vbox(gauge_box | hcenter | flex, t | hcenter);
+		});
 	auto catcher =
 		CatchEvent(renderer, [value_ptr, increment, min_value, max_value](Event event) {
 			if (!value_ptr) return false;
@@ -184,36 +190,36 @@ inline Component StepSlider(int* value_ptr, int step, unsigned int* step_active,
 }
 
 inline Component StepSliderBipolar(int* value_ptr, int step, unsigned int* step_active,
-								   int increment = 25, int min_value = 0,
-								   int max_value = 100)
+								   int* sequence_length, int increment = 25,
+								   int min_value = 0, int max_value = 100)
 {
-	auto renderer =
-		Renderer([value_ptr, step_active, step, min_value, max_value](bool focused) {
-			float val_pos = 0.f;
-			float val_neg = 0.f;
+	auto renderer = Renderer([value_ptr, step_active, step, min_value, max_value,
+							  sequence_length](bool focused) {
+		float val_pos = 0.f;
+		float val_neg = 0.f;
 
-			if (*value_ptr > 0) val_pos = *value_ptr / (float)max_value;
-			else if (*value_ptr < 0) val_neg = *value_ptr / (float)min_value;
+		if (*value_ptr > 0) val_pos = *value_ptr / (float)max_value;
+		else if (*value_ptr < 0) val_neg = *value_ptr / (float)min_value;
 
-			auto g_up = gaugeUp(val_pos);
-			auto g_do = gaugeDown(val_neg);
+		auto g_up = gaugeUp(val_pos);
+		auto g_do = gaugeDown(val_neg);
 
-			auto label = text(std::to_string(step + 1));
-			auto divider = text("—");
+		auto label = text(std::to_string(step + 1));
+		auto divider = text("—");
 
-			if (focused) {
-				g_up = g_up | color(Color::Green);
-				g_do = g_do | color(Color::Green);
-				label = label | color(Color::Green);
-				divider = divider | color(Color::Green);
-			} else if (step == *step_active) {
-				g_up = g_up | color(Color::Cyan);
-				g_do = g_do | color(Color::Cyan);
-				label = label | color(Color::Cyan);
-				divider = divider | color(Color::Cyan);
-			}
-			return vbox(g_up | flex, divider, g_do | flex, label);
-		});
+		auto gauge_box = vbox(g_up | flex, divider, g_do | flex) | border;
+
+		if (focused) {
+			gauge_box = gauge_box | color(Color::Green);
+			label = label | color(Color::Green);
+		}
+		if (step == *step_active) { label = label | color(Color::Cyan) | underlined; }
+		if (step >= *sequence_length) {
+			label = label | color(Color::GrayDark);
+			gauge_box = gauge_box | color(Color::GrayDark);
+		}
+		return vbox(gauge_box | hcenter | flex, label | hcenter);
+	});
 
 	auto catcher =
 		CatchEvent(renderer, [value_ptr, increment, min_value, max_value](Event event) {
