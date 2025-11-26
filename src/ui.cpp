@@ -50,7 +50,7 @@ const std::vector<std::string> pb_directions = {"forward", "backward", "pendulum
 void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp)
 {
 	std::vector<std::string> tab_values {
-		"T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "MT",
+		" T1 ", " T2 ", " T3 ", " T4 ", " T5 ", " T6 ", " T7 ", " T8 ", " T9 ", " MT ",
 	};
 
 	/////////////
