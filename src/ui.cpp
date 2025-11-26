@@ -133,7 +133,7 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 
 		for (int s = 0; s < NUM_STEPS; s++) {
 			auto slider = StepSlider(&dsp->tracks[t].sequencer.data[s], s,
-									 &dsp->tracks[t].sequencer.current_pos);
+									 &dsp->tracks[t].sequencer.current_pos, 20);
 			sliders_container->Add(slider | flex);
 		}
 
