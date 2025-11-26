@@ -2,6 +2,8 @@
 #include "clock.hpp"
 #include "sequencer.hpp"
 #include <array>
+#include <cstdlib>
+#include <random>
 
 float plaits::kSampleRate = SAMPLERATE;
 float plaits::kCorrectedSampleRate = SAMPLERATE;
@@ -27,31 +29,31 @@ void plaits_voice_init(flechtbox_track& p)
 	stmlib::BufferAllocator allocator(p.shared_buffer, PLAITS_BLOCKSIZE * 1024);
 	p.voice->Init(&allocator);
 
-	p.patch.engine = 8;
-	p.patch.note = 48.0f;
-	p.patch.harmonics = 0.5f;
-	p.patch.timbre = 0.5f;
-	p.patch.morph = 0.5f;
-	p.patch.frequency_modulation_amount = 0.0f;
-	p.patch.timbre_modulation_amount = 0.0f;
-	p.patch.morph_modulation_amount = 0.0f;
-	p.patch.lpg_colour = 0.5f;
-	p.patch.decay = 0.5f;
+	p.plaits_patch.engine = 8;
+	p.plaits_patch.note = 48.0f;
+	p.plaits_patch.harmonics = 0.5f;
+	p.plaits_patch.timbre = 0.5f;
+	p.plaits_patch.morph = 0.5f;
+	p.plaits_patch.frequency_modulation_amount = 0.0f;
+	p.plaits_patch.timbre_modulation_amount = 0.0f;
+	p.plaits_patch.morph_modulation_amount = 0.0f;
+	p.plaits_patch.lpg_colour = 0.5f;
+	p.plaits_patch.decay = 0.5f;
 
-	p.modulations.engine = 0;
-	p.modulations.frequency = 0;
-	p.modulations.frequency_patched = false;
-	p.modulations.harmonics = 0;
-	p.modulations.level = 0;
-	p.modulations.level_patched = false;
-	p.modulations.morph = 0;
-	p.modulations.morph_patched = false;
-	p.modulations.note = 0;
-	p.modulations.timbre = 0;
-	p.modulations.timbre_patched = false;
-	p.modulations.trigger = 0;
-	p.modulations.trigger_patched = true;
-	p.modulations.sustain_level = 0;
+	p.plaits_mods.engine = 0;
+	p.plaits_mods.frequency = 0;
+	p.plaits_mods.frequency_patched = false;
+	p.plaits_mods.harmonics = 0;
+	p.plaits_mods.level = 0;
+	p.plaits_mods.level_patched = false;
+	p.plaits_mods.morph = 0;
+	p.plaits_mods.morph_patched = false;
+	p.plaits_mods.note = 0;
+	p.plaits_mods.timbre = 0;
+	p.plaits_mods.timbre_patched = false;
+	p.plaits_mods.trigger = 0;
+	p.plaits_mods.trigger_patched = true;
+	p.plaits_mods.sustain_level = 0;
 
 	track_seq_init(p.sequencer);
 }
@@ -63,6 +65,16 @@ bool rand_bool(int probability)
 
 	// Return true if random value is less than the probability
 	return randomValue < probability;
+}
+
+float randf(float amount, float min = -0.5f, float max = 0.5f)
+{
+	if (amount > 0.f) {
+		static thread_local std::mt19937 rng(std::random_device {}());
+		std::uniform_real_distribution<float> dist(min, max);
+		return dist(rng) * amount;
+	}
+	return 0.f;
 }
 
 void dsp_process_block(std::shared_ptr<flechtbox_dsp> dsp, float* out, int frames)
@@ -84,28 +96,40 @@ void dsp_process_block(std::shared_ptr<flechtbox_dsp> dsp, float* out, int frame
 		int global_velocity = dsp->velocity_sequence.last_value;
 
 		// render all tracks
-		for (int t = 0; t < NUM_TRACKS; t++) {
-			auto& p = dsp->tracks[t];
+		for (int i = 0; i < NUM_TRACKS; i++) {
+			auto& t = dsp->tracks[i];
 
-			if (!p.enabled) continue;
+			if (!t.enabled) continue;
 
 			int step_probability =
-				track_seq_process_step(p.sequencer, dsp->clock.cur_clock_states);
+				track_seq_process_step(t.sequencer, dsp->clock.cur_clock_states);
 
-			if (!p.muted && rand_bool(step_probability)) {
+			// TRIGGERED
+			if (!t.muted && rand_bool(step_probability)) {
 
-				p.patch.note = p.pitch;
-				if (p.global_pitch_enabled) p.patch.note += global_pitch;
-				if (p.global_octave_enabled) p.patch.note += global_octave;
-				if (p.global_velocity_enabled)
-					p.current_velocity = global_velocity / 100.f;
-				else p.current_velocity = 1.f;
-				p.modulations.trigger = 1.f;
+				// generate random numbers
+				t.harmonics_rand_val = randf(t.harmonics_rand_amt);
+				t.timbre_rand_val = randf(t.timbre_rand_amt);
+				t.morph_rand_val = randf(t.morph_rand_amt);
+
+				// apply global parameters
+				t.plaits_patch.note = t.pitch;
+				if (t.global_pitch_enabled) t.plaits_patch.note += global_pitch;
+				if (t.global_octave_enabled) t.plaits_patch.note += global_octave;
+				if (t.global_velocity_enabled)
+					t.current_velocity = global_velocity / 100.f;
+				else t.current_velocity = 1.f;
+				t.plaits_mods.trigger = 1.f;
 			}
 
-			p.voice->Render(p.patch, p.modulations, p.frames, PLAITS_BLOCKSIZE);
+			// update plaits patch
+			t.plaits_patch.harmonics = t.harmonics + t.harmonics_rand_val;
+			t.plaits_patch.timbre = t.timbre + t.timbre_rand_val;
+			t.plaits_patch.morph = t.morph + t.morph_rand_val;
 
-			p.modulations.trigger = 0.f;
+			t.voice->Render(t.plaits_patch, t.plaits_mods, t.frames, PLAITS_BLOCKSIZE);
+
+			t.plaits_mods.trigger = 0.f;
 		}
 
 		// print voices to output

@@ -20,14 +20,24 @@ const int NUM_STEPS = 10;
 struct flechtbox_track {
 	int pitch = 48;
 
+	float harmonics = 0.5f;
+	float harmonics_rand_amt = 0.f;
+	float harmonics_rand_val = 0.f;
+	float timbre = 0.5f;
+	float timbre_rand_amt = 0.f;
+	float timbre_rand_val = 0.f;
+	float morph = 0.5f;
+	float morph_rand_amt = 0.f;
+	float morph_rand_val = 0.f;
+
 	bool global_pitch_enabled = true;
 	bool global_velocity_enabled = true;
 	bool global_octave_enabled = true;
 
 	float current_velocity = 1.f;
 
-	plaits::Patch patch;
-	plaits::Modulations modulations;
+	plaits::Patch plaits_patch;
+	plaits::Modulations plaits_mods;
 	plaits::Voice* voice;
 	plaits::Voice::Frame* frames;
 

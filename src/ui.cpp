@@ -142,16 +142,31 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 		}
 
 		auto lgp_ctrls = Container::Horizontal({
-			FloatControl(&dsp->tracks[t].patch.decay, "decay") | flex,
-			FloatControl(&dsp->tracks[t].patch.lpg_colour, "color") | flex,
+			FloatControl(&dsp->tracks[t].plaits_patch.decay, "decay") | flex,
+			FloatControl(&dsp->tracks[t].plaits_patch.lpg_colour, "color") | flex,
+		});
+
+		auto harmonics_container = Container::Horizontal({
+			FloatControl(&dsp->tracks[t].harmonics, "harmonics") | flex,
+			FloatControl(&dsp->tracks[t].harmonics_rand_amt, "rand"),
+		});
+
+		auto timbre_container = Container::Horizontal({
+			FloatControl(&dsp->tracks[t].timbre, "timbre") | flex,
+			FloatControl(&dsp->tracks[t].timbre_rand_amt, "rand"),
+		});
+
+		auto morph_container = Container::Horizontal({
+			FloatControl(&dsp->tracks[t].morph, "morph") | flex,
+			FloatControl(&dsp->tracks[t].morph_rand_amt, "rand"),
 		});
 
 		auto plaitsctrls_container = Container::Vertical({
-			FloatControl(&dsp->tracks[t].patch.harmonics, "harmonics"),
-			FloatControl(&dsp->tracks[t].patch.timbre, "timbre"),
-			FloatControl(&dsp->tracks[t].patch.morph, "morph"),
+			harmonics_container,
+			timbre_container,
+			morph_container,
 			lgp_ctrls,
-			Dropdown(&engines, &dsp->tracks[t].patch.engine),
+			Dropdown(&engines, &dsp->tracks[t].plaits_patch.engine),
 		});
 
 		auto trackctrls_container = Container::Vertical(
