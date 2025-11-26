@@ -15,6 +15,7 @@ Yet to be implemented:
 - per-track and/or global modulation source
 - keyboard shortcuts for quick navigation
 - send fx
+- quantizer with selectable global scale
 
 Uses [PortAudio](https://github.com/PortAudio/portaudio) and [FTXUI](https://github.com/ArthurSonzogni/FTXUI/).
 
