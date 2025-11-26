@@ -141,11 +141,6 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 			sliders_container->Add(slider | flex);
 		}
 
-		auto lgp_ctrls = Container::Horizontal({
-			FloatControl(&dsp->tracks[t].plaits_patch.decay, "decay") | flex,
-			FloatControl(&dsp->tracks[t].plaits_patch.lpg_colour, "color") | flex,
-		});
-
 		auto harmonics_container = Container::Horizontal({
 			FloatControl(&dsp->tracks[t].harmonics, "harmonics") | flex,
 			FloatControl(&dsp->tracks[t].harmonics_rand_amt, "rand"),
@@ -159,6 +154,11 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 		auto morph_container = Container::Horizontal({
 			FloatControl(&dsp->tracks[t].morph, "morph") | flex,
 			FloatControl(&dsp->tracks[t].morph_rand_amt, "rand"),
+		});
+
+		auto lgp_ctrls = Container::Horizontal({
+			FloatControl(&dsp->tracks[t].plaits_patch.decay, "decay") | flex,
+			FloatControl(&dsp->tracks[t].plaits_patch.lpg_colour, "color") | flex,
 		});
 
 		auto plaitsctrls_container = Container::Vertical({

@@ -17,9 +17,21 @@ inline bool is_event_increase(Event event)
 	return event == Event::ArrowUpCtrl || event == Event::Character('K');
 }
 
+// page up or ctrl+k
+inline bool is_event_increase_max(Event event)
+{
+	return event == Event::PageUp || event == Event::Special("\x0b");
+}
+
 inline bool is_event_decrease(Event event)
 {
 	return event == Event::ArrowDownCtrl || event == Event::Character('J');
+}
+
+// page down or ctrl+j
+inline bool is_event_decrease_max(Event event)
+{
+	return event == Event::PageDown || event == Event::Special("\x0a");
 }
 
 inline Component Light(bool* light_on)
@@ -87,6 +99,14 @@ inline Component FloatControl(float* value_ptr, std::string label = "",
 				if (next != *value_ptr) *value_ptr = next;
 				return true;
 			}
+			if (is_event_increase_max(event)) {
+				*value_ptr = max_value;
+				return true;
+			}
+			if (is_event_decrease_max(event)) {
+				*value_ptr = min_value;
+				return true;
+			}
 			return false;
 		});
 
@@ -141,6 +161,14 @@ inline Component IntegerControl(int* value_ptr, std::string label = "", int step
 				if (next != *value_ptr) *value_ptr = next;
 				return true;
 			}
+			if (is_event_increase_max(event)) {
+				*value_ptr = max_value;
+				return true;
+			}
+			if (is_event_decrease_max(event)) {
+				*value_ptr = min_value;
+				return true;
+			}
 			return false;
 		});
 
@@ -182,6 +210,14 @@ inline Component StepSlider(int* value_ptr, int step, unsigned int* step_active,
 				int next = *value_ptr - increment;
 				if (next < min_value) next = min_value;
 				if (next != *value_ptr) *value_ptr = next;
+				return true;
+			}
+			if (is_event_increase_max(event)) {
+				*value_ptr = max_value;
+				return true;
+			}
+			if (is_event_decrease_max(event)) {
+				*value_ptr = min_value;
 				return true;
 			}
 			return false;
@@ -234,6 +270,14 @@ inline Component StepSliderBipolar(int* value_ptr, int step, unsigned int* step_
 				int next = *value_ptr - increment;
 				if (next < min_value) next = min_value;
 				if (next != *value_ptr) *value_ptr = next;
+				return true;
+			}
+			if (is_event_increase_max(event)) {
+				*value_ptr = max_value;
+				return true;
+			}
+			if (is_event_decrease_max(event)) {
+				*value_ptr = min_value;
 				return true;
 			}
 			return false;

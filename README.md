@@ -28,6 +28,8 @@ To navigate between controls, use either the arrow keys or hjkl.
 
 To manipulate parameters, use ctrl+up/down or K/J.
 
+To set the minimum/maximum value of a control, press PageDown/PageUp or ctrl+j/ctrl+k
+
 Other keybinds:
 
 - 1-9: select track
