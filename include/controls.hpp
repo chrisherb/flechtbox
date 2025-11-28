@@ -45,7 +45,7 @@ inline Component Light(bool* light_on)
 	return Container::Vertical({renderer});
 }
 
-struct ControlOptions {
+struct NumberControlOptions {
 	bool horizontal = false;
 	bool border = true;
 };
@@ -53,7 +53,7 @@ struct ControlOptions {
 template <typename num_t>
 inline Component NumberControl(num_t* value_ptr, std::string label = "", num_t step = 1,
 							   num_t min_value = 0, num_t max_value = 1,
-							   ControlOptions options = {},
+							   NumberControlOptions options = {},
 							   std::function<std::string(num_t)> format = nullptr)
 {
 	// Create a focusable renderer by using the (bool focused) lambda variant.
@@ -115,7 +115,7 @@ inline Component NumberControl(num_t* value_ptr, std::string label = "", num_t s
 
 inline Component FloatControl(float* value_ptr, std::string label = "",
 							  float step = 0.01f, float min_value = 0.f,
-							  float max_value = 1.f, ControlOptions options = {},
+							  float max_value = 1.f, NumberControlOptions options = {},
 							  std::function<std::string(float)> format = nullptr)
 {
 	if (format == nullptr)
@@ -131,7 +131,7 @@ inline Component FloatControl(float* value_ptr, std::string label = "",
 
 inline Component IntegerControl(int* value_ptr, std::string label = "", int step = 1,
 								int min_value = 0, int max_value = 1,
-								ControlOptions options = {},
+								NumberControlOptions options = {},
 								std::function<std::string(int)> format = nullptr)
 {
 	return NumberControl<int>(value_ptr, label, step, min_value, max_value, options,
