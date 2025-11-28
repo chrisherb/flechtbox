@@ -1,3 +1,6 @@
 [submodule "lib/eurorack"]
 	path = lib/eurorack
 	url = https://github.com/chrisherb/eurorack.git
+[submodule "lib/trnr-lib"]
+	path = lib/trnr-lib
+	url = https://github.com/chrisherb/trnr-lib.git

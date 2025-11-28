@@ -23,6 +23,7 @@ set(PROJECT_SRCS
 set(MI_DIR ${PROJECT_SOURCE_DIR}/lib/eurorack)
 set(STMLIB_DIR ${MI_DIR}/stmlib)
 set(PLAITS_DIR ${MI_DIR}/plaits)
+set(CLOUDS_DIR ${MI_DIR}/clouds)
 
 # Gather all required files in Mutable Instruments and Plaits
 set(MI_SRCS
@@ -36,6 +37,10 @@ set(MI_SRCS
     ${STMLIB_DIR}/dsp/units.cc
     ${STMLIB_DIR}/dsp/units.h
     ${STMLIB_DIR}/dsp/filter.h
+    ${STMLIB_DIR}/dsp/cosine_oscillator.h
+    ${CLOUDS_DIR}/dsp/frame.h
+    ${CLOUDS_DIR}/dsp/fx/reverb.h
+    ${CLOUDS_DIR}/dsp/fx/fx_engine.h
     ${PLAITS_DIR}/resources.cc
     ${PLAITS_DIR}/resources.h
     ${PLAITS_DIR}/dsp/voice.cc
@@ -159,6 +164,7 @@ target_include_directories(flechtbox
     lib/eurorack
     lib/eurorack/plaits
     lib/eurorack/stmlib
+    lib/trnr-lib/util
     include
 )
 

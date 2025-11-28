@@ -180,6 +180,7 @@ void ui_run(ftxui::ScreenInteractive& screen, std::shared_ptr<flechtbox_dsp> dsp
 			Checkbox("pitch", &dsp->tracks[t].global_pitch_enabled),
 			Checkbox("octave", &dsp->tracks[t].global_octave_enabled),
 			Checkbox("velocity", &dsp->tracks[t].global_velocity_enabled),
+			FloatControl(&dsp->tracks[t].reverb_send_amt, "reverb"),
 		});
 
 		auto settings_container = Container::Horizontal(

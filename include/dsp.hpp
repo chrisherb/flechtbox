@@ -2,12 +2,14 @@
 
 #include <array>
 #include <atomic>
+#include <audio_buffer.h>
 #include <memory>
 #include <plaits/dsp/dsp.h>
 #include <plaits/dsp/voice.h>
 
 #include "clock.hpp"
 #include "parameters.hpp"
+#include "reverb.hpp"
 #include "sequencer.hpp"
 
 const double SAMPLERATE = 48000;
@@ -34,6 +36,8 @@ struct flechtbox_track {
 	bool global_velocity_enabled = true;
 	bool global_octave_enabled = true;
 
+	float reverb_send_amt = 0.0f;
+
 	float current_velocity = 1.f;
 
 	plaits::Patch plaits_patch;
@@ -50,11 +54,12 @@ struct flechtbox_track {
 	track_seq sequencer;
 };
 
-void plaits_voice_init(flechtbox_track& p);
+void flechtbox_track_init(flechtbox_track& p);
 
 struct flechtbox_dsp {
 	metronome clock;
 	parameters params;
+	std::atomic<bool> should_quit {false};
 
 	track_seq pitch_sequence;
 	track_seq velocity_sequence;
@@ -62,7 +67,10 @@ struct flechtbox_dsp {
 
 	std::array<flechtbox_track, NUM_TRACKS> tracks {};
 
-	std::atomic<bool> should_quit {false};
+	clouds_reverb reverb;
+
+	trnr::audio_buffer<float> reverb_buffer;
+	trnr::audio_buffer<float> mix_buffer;
 };
 
 void dsp_init(std::shared_ptr<flechtbox_dsp> dsp);

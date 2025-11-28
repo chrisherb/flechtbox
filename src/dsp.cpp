@@ -1,5 +1,7 @@
 #include "dsp.hpp"
+#include "audio_buffer.h"
 #include "clock.hpp"
+#include "reverb.hpp"
 #include "sequencer.hpp"
 #include <array>
 #include <cstdlib>
@@ -9,18 +11,25 @@ float plaits::kSampleRate = SAMPLERATE;
 float plaits::kCorrectedSampleRate = SAMPLERATE;
 float plaits::a0 = (440.0f / 8.0f) / plaits::kCorrectedSampleRate;
 
+static constexpr size_t kReverbBufferSize = 16384;
+static uint16_t reverb_buffer[kReverbBufferSize] = {0};
+
 void dsp_init(std::shared_ptr<flechtbox_dsp> dsp)
 {
 	dsp->clock.samplerate = SAMPLERATE;
 
-	for (int i = 0; i < NUM_TRACKS; i++) { plaits_voice_init(dsp->tracks[i]); }
+	for (int i = 0; i < NUM_TRACKS; i++) { flechtbox_track_init(dsp->tracks[i]); }
 
 	track_seq_init(dsp->pitch_sequence);
 	track_seq_init(dsp->octave_sequence);
 	dsp->velocity_sequence.data.fill(100);
+
+	trnr::audio_buffer_init(dsp->reverb_buffer, 2, PLAITS_BLOCKSIZE);
+	trnr::audio_buffer_init(dsp->mix_buffer, 2, PLAITS_BLOCKSIZE);
+	clouds_reverb_init(dsp->reverb, reverb_buffer);
 }
 
-void plaits_voice_init(flechtbox_track& p)
+void flechtbox_track_init(flechtbox_track& p)
 {
 	p.frames = new plaits::Voice::Frame[16];
 	p.voice = new plaits::Voice();
@@ -77,13 +86,14 @@ float randf(float amount, float min = -0.5f, float max = 0.5f)
 	return 0.f;
 }
 
-void dsp_process_block(std::shared_ptr<flechtbox_dsp> dsp, float* out, int frames)
+void dsp_process_block(std::shared_ptr<flechtbox_dsp> dsp, float* out, int block_size)
 {
-	// clear audio
-	std::fill(out, out + frames * 2, 0.0f);
+	// if block_size isn't multiple of plaits block size (16), do nothing
+	// TODO: show error
+	if (block_size % PLAITS_BLOCKSIZE != 0) return;
 
 	// convert from internal block size to whatever size the host is running
-	for (int block_count = 0; block_count < frames; block_count += PLAITS_BLOCKSIZE) {
+	for (int block_count = 0; block_count < block_size; block_count += PLAITS_BLOCKSIZE) {
 		// clock states for this block
 		clock_process_block(dsp->clock, PLAITS_BLOCKSIZE);
 
@@ -134,14 +144,34 @@ void dsp_process_block(std::shared_ptr<flechtbox_dsp> dsp, float* out, int frame
 
 		// print voices to output
 		for (int i = 0; i < PLAITS_BLOCKSIZE; i++) {
-			float voice_out = 0.f;
+			float mix_send = 0.f;
+			float reverb_send = 0.f;
 			for (int t = 0; t < NUM_TRACKS; t++) {
-				auto& p = dsp->tracks[t];
-				voice_out += p.frames[i].out / 32768.0f * p.current_velocity * p.volume;
-				// float voice_aux = p.frames[i].aux / 32768.0f;
+				auto& track = dsp->tracks[t];
+				float voice_out = track.frames[i].out / 32768.0f *
+								  track.current_velocity * track.volume;
+
+				mix_send += voice_out;
+				reverb_send += voice_out * track.reverb_send_amt;
 			}
-			*out++ = soft_clip(voice_out); /* left */
-			*out++ = soft_clip(voice_out); /* right */
+			dsp->reverb_buffer.channel_ptrs[0][i] = reverb_send;
+			dsp->reverb_buffer.channel_ptrs[1][i] = reverb_send;
+
+			dsp->mix_buffer.channel_ptrs[0][i] = mix_send;
+			dsp->mix_buffer.channel_ptrs[1][i] = mix_send;
+		}
+
+		clouds_reverb_process(dsp->reverb, dsp->reverb_buffer.channel_ptrs,
+							  PLAITS_BLOCKSIZE);
+
+		for (int i = 0; i < PLAITS_BLOCKSIZE; i++) {
+			// print reverb signal to mix buffer
+			dsp->mix_buffer.channel_ptrs[0][i] += dsp->reverb_buffer.channel_ptrs[0][i];
+			dsp->mix_buffer.channel_ptrs[1][i] += dsp->reverb_buffer.channel_ptrs[1][i];
+
+			// soft clip mix and write to output
+			*out++ = soft_clip(dsp->mix_buffer.channel_ptrs[0][i]); /* left */
+			*out++ = soft_clip(dsp->mix_buffer.channel_ptrs[1][i]); /* right */
 		}
 	}
 }
