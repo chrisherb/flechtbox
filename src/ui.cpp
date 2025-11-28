@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <thread>
 
 #include "controls.hpp"
 #include "dsp.hpp"

@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
 project(flechtbox LANGUAGES CXX)
-
-# Set C++ standard and warnings
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_compile_options(-Wall)
 
@@ -14,7 +10,7 @@ set(PLAITS_DIR ${MI_DIR}/plaits)
 set(CLOUDS_DIR ${MI_DIR}/clouds)
 
 # Gather all required files in Mutable Instruments and Plaits
-# I can only get it to work by adding all relevant cc/h files
+# I can only get it to work by manually adding all relevant cc/h files
 set(MI_SRCS
     ${STMLIB_DIR}/stmlib.h
     ${STMLIB_DIR}/utils/buffer_allocator.h
@@ -168,19 +164,19 @@ target_include_directories(flechtbox
 target_link_libraries(flechtbox
   PRIVATE
     portaudio
-    ftxui-component
-    ftxui-dom
-    ftxui-screen
 )
 
+# add trnr-lib
 add_subdirectory(lib/trnr-lib)
 target_link_libraries(flechtbox PRIVATE trnr-lib)
 
-# If you ever want to build with JACK, add this option:
-option(ENABLE_JACK "Enable JACK audio support" OFF)
-if(ENABLE_JACK)
-  target_link_libraries(flechtbox PRIVATE jack)
-endif()
+# add ftxui
+add_subdirectory(lib/ftxui)
+target_link_libraries(flechtbox PRIVATE screen)
+target_link_libraries(flechtbox PRIVATE dom)
+target_link_libraries(flechtbox PRIVATE component)
+
+target_compile_features(flechtbox PRIVATE cxx_std_17)
 
 # Installation (optional)
 install(TARGETS flechtbox RUNTIME DESTINATION bin)
