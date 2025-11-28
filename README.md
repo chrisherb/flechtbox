@@ -41,9 +41,19 @@ Other keybinds:
 - F1: start/stop
 - m: mute selected track
 
+## (linux) dependencies
+
+For ALSA/Pipewire compatibility, you'll need `libasound2-dev`.
+
+For PulseAudio compatibility, you'll need `libpulse-dev`.
+
+For JACK compatibility, you'll need `libjack-jackd2-dev`.
+
+MacOS should compile out of the box.
+
 ## how to build
 
-clone repository:
+clone repository with submodules:
 
 ```bash
 git clone --recursive https://github.com/chrisherb/flechtbox.git
