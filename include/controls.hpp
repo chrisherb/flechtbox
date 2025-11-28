@@ -199,6 +199,11 @@ inline Component StepSlider(int* value_ptr, int step, unsigned int* step_active,
 	auto catcher =
 		CatchEvent(renderer, [value_ptr, increment, min_value, max_value](Event event) {
 			if (!value_ptr) return false;
+			if (event == Event::Character(' ')) {
+				if (*value_ptr < max_value) *value_ptr = max_value;
+				else *value_ptr = min_value;
+                return true;
+			}
 			if (is_event_increase(event)) {
 				int next = *value_ptr + increment;
 				if (next > max_value) next = max_value;

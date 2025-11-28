@@ -29,6 +29,7 @@ To navigate between controls, use either the arrow keys or hjkl.
 To manipulate parameters, use ctrl+up/down or K/J.
 
 To set the minimum/maximum value of a control, press PageDown/PageUp or ctrl+j/ctrl+k
+or, when a slider is selected, press space to toggle the min/max value.
 
 Other keybinds:
 
