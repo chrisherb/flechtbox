@@ -17,10 +17,9 @@ inline bool is_event_increase(Event event)
 	return event == Event::ArrowUpCtrl || event == Event::Character('K');
 }
 
-// page up or ctrl+k
 inline bool is_event_increase_max(Event event)
 {
-	return event == Event::PageUp || event == Event::Special("\x0b");
+	return event == Event::PageUp || event == Event::CtrlK;
 }
 
 inline bool is_event_decrease(Event event)
@@ -28,10 +27,9 @@ inline bool is_event_decrease(Event event)
 	return event == Event::ArrowDownCtrl || event == Event::Character('J');
 }
 
-// page down or ctrl+j
 inline bool is_event_decrease_max(Event event)
 {
-	return event == Event::PageDown || event == Event::Special("\x0a");
+	return event == Event::PageDown || event == Event::CtrlJ;
 }
 
 inline Component Light(bool* light_on)
@@ -202,7 +200,7 @@ inline Component StepSlider(int* value_ptr, int step, unsigned int* step_active,
 			if (event == Event::Character(' ')) {
 				if (*value_ptr < max_value) *value_ptr = max_value;
 				else *value_ptr = min_value;
-                return true;
+				return true;
 			}
 			if (is_event_increase(event)) {
 				int next = *value_ptr + increment;
