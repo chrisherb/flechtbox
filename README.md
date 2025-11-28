@@ -11,14 +11,16 @@ Terminal-based groovebox.
 - master track with independent sequences for pitch, octave and velocity
 - slave tracks derive pitch/octave/velocity from master track
 - all step sequencers can be set to arbitrary length from 2 to 10
+- global reverb (borrowed from Mutable Instruments Clouds) with send per track
 
 Yet to be implemented:
 
 - per-track and/or global modulation source
-- send fx
 - quantizer with selectable global scale
 - midi sync
 - (per-step) clock divison
+- load/save
+- delay fx
 
 Uses [PortAudio](https://github.com/PortAudio/portaudio) and [FTXUI](https://github.com/ArthurSonzogni/FTXUI/).
 
@@ -29,7 +31,8 @@ To navigate between controls, use either the arrow keys or hjkl.
 To manipulate parameters, use ctrl+up/down or K/J.
 
 To set the minimum/maximum value of a control, press PageDown/PageUp or ctrl+j/ctrl+k
-or, when a slider is selected, press space to toggle the min/max value.
+
+To toggle between minimum/maximum values of slider controls, press space.
 
 Other keybinds:
 
@@ -66,6 +69,7 @@ run (from build folder):
 ```bash
 ./flechtbox
 ```
+
 ## donate
 
 If you want to support my work, please consider to [buy me a Sandwich 🥪](https://trnr.gumroad.com/coffee).
