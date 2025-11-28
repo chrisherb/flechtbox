@@ -11,21 +11,10 @@ add_compile_options(-Wall)
 set(MI_DIR ${PROJECT_SOURCE_DIR}/lib/eurorack)
 set(STMLIB_DIR ${MI_DIR}/stmlib)
 set(PLAITS_DIR ${MI_DIR}/plaits)
-
-# List main project sources
-set(PROJECT_SRCS
-  src/main.cpp
-  src/audio.cpp
-  src/ui.cpp
-  src/dsp.cpp
-)
-
-set(MI_DIR ${PROJECT_SOURCE_DIR}/lib/eurorack)
-set(STMLIB_DIR ${MI_DIR}/stmlib)
-set(PLAITS_DIR ${MI_DIR}/plaits)
 set(CLOUDS_DIR ${MI_DIR}/clouds)
 
 # Gather all required files in Mutable Instruments and Plaits
+# I can only get it to work by adding all relevant cc/h files
 set(MI_SRCS
     ${STMLIB_DIR}/stmlib.h
     ${STMLIB_DIR}/utils/buffer_allocator.h
@@ -152,6 +141,14 @@ set(MI_SRCS
     ${PLAITS_DIR}/dsp/chords/chord_bank.h
 )
 
+# List main project sources
+set(PROJECT_SRCS
+  src/main.cpp
+  src/audio.cpp
+  src/ui.cpp
+  src/dsp.cpp
+)
+
 # Combine sources
 set(ALL_SRCS ${PROJECT_SRCS} ${MI_SRCS} ${MI_CPP_SRCS})
 
@@ -164,7 +161,6 @@ target_include_directories(flechtbox
     lib/eurorack
     lib/eurorack/plaits
     lib/eurorack/stmlib
-    lib/trnr-lib/util
     include
 )
 
@@ -176,6 +172,9 @@ target_link_libraries(flechtbox
     ftxui-dom
     ftxui-screen
 )
+
+add_subdirectory(lib/trnr-lib)
+target_link_libraries(flechtbox PRIVATE trnr-lib)
 
 # If you ever want to build with JACK, add this option:
 option(ENABLE_JACK "Enable JACK audio support" OFF)
