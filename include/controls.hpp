@@ -5,6 +5,7 @@
 #include <ftxui/dom/direction.hpp>
 #include <ftxui/dom/elements.hpp>
 #include <ftxui/screen/color.hpp>
+#include <functional>
 #include <iomanip>
 #include <memory>
 #include <sstream>
@@ -49,72 +50,11 @@ struct ControlOptions {
 	bool border = true;
 };
 
-inline Component FloatControl(float* value_ptr, std::string label = "",
-							  float step = 0.01f, float min_value = 0.f,
-							  float max_value = 1.f, ControlOptions options = {},
-							  std::function<std::string(float)> format = nullptr)
-{
-	// Create a focusable renderer by using the (bool focused) lambda variant.
-	// When focused we change the style so it's visible.
-	auto renderer = Renderer([value_ptr, label, format, options](bool focused) {
-		if (!value_ptr) {
-			auto e = text("N/A") | hcenter | border;
-			if (focused) e = e | bold | color(Color::Green);
-			return e;
-		}
-		std::string s;
-		if (format) {
-			s = format(*value_ptr);
-		} else {
-			// sensible default formatting
-			std::ostringstream os;
-			os << std::fixed << std::setprecision(2) << *value_ptr;
-			s = os.str();
-		}
-		auto e = text(s) | hcenter;
-		if (options.border) e = e | border;
-		// Visual focus indicator: bold + color the border text when focused.
-		if (focused) e = e | bold | color(Color::Green);
-
-		if (options.horizontal)
-			return hbox({text(label) | vcenter, text(" "), e, text(" ")});
-		else return vbox({text(label), e});
-	});
-
-	auto catcher =
-		CatchEvent(renderer, [value_ptr, step, min_value, max_value](Event event) {
-			if (!value_ptr) return false;
-			if (is_event_increase(event)) {
-				float next = *value_ptr + step;
-				if (next > max_value) next = max_value;
-				if (next != *value_ptr) *value_ptr = next;
-				return true;
-			}
-			if (is_event_decrease(event)) {
-				float next = *value_ptr - step;
-				if (next < min_value) next = min_value;
-				if (next != *value_ptr) *value_ptr = next;
-				return true;
-			}
-			if (is_event_increase_max(event)) {
-				*value_ptr = max_value;
-				return true;
-			}
-			if (is_event_decrease_max(event)) {
-				*value_ptr = min_value;
-				return true;
-			}
-			return false;
-		});
-
-	// Container makes the control focusable when used in a parent container.
-	return Container::Vertical({catcher});
-}
-
-inline Component IntegerControl(int* value_ptr, std::string label = "", int step = 1,
-								int min_value = 0, int max_value = 1,
-								ControlOptions options = {},
-								std::function<std::string(int)> format = nullptr)
+template <typename num_t>
+inline Component NumberControl(num_t* value_ptr, std::string label = "", num_t step = 1,
+							   num_t min_value = 0, num_t max_value = 1,
+							   ControlOptions options = {},
+							   std::function<std::string(num_t)> format = nullptr)
 {
 	// Create a focusable renderer by using the (bool focused) lambda variant.
 	// When focused we change the style so it's visible.
@@ -147,13 +87,13 @@ inline Component IntegerControl(int* value_ptr, std::string label = "", int step
 		CatchEvent(renderer, [value_ptr, step, min_value, max_value](Event event) {
 			if (!value_ptr) return false;
 			if (is_event_increase(event)) {
-				int next = *value_ptr + step;
+				num_t next = *value_ptr + step;
 				if (next > max_value) next = max_value;
 				if (next != *value_ptr) *value_ptr = next;
 				return true;
 			}
 			if (is_event_decrease(event)) {
-				int next = *value_ptr - step;
+				num_t next = *value_ptr - step;
 				if (next < min_value) next = min_value;
 				if (next != *value_ptr) *value_ptr = next;
 				return true;
@@ -171,6 +111,31 @@ inline Component IntegerControl(int* value_ptr, std::string label = "", int step
 
 	// Container makes the control focusable when used in a parent container.
 	return Container::Vertical({catcher});
+}
+
+inline Component FloatControl(float* value_ptr, std::string label = "",
+							  float step = 0.01f, float min_value = 0.f,
+							  float max_value = 1.f, ControlOptions options = {},
+							  std::function<std::string(float)> format = nullptr)
+{
+	if (format == nullptr)
+		format = [](float input) {
+			std::ostringstream os;
+			os << std::fixed << std::setprecision(2) << input;
+			return os.str();
+		};
+
+	return NumberControl<float>(value_ptr, label, step, min_value, max_value, options,
+								format);
+}
+
+inline Component IntegerControl(int* value_ptr, std::string label = "", int step = 1,
+								int min_value = 0, int max_value = 1,
+								ControlOptions options = {},
+								std::function<std::string(int)> format = nullptr)
+{
+	return NumberControl<int>(value_ptr, label, step, min_value, max_value, options,
+							  format);
 }
 
 inline Component StepSlider(int* value_ptr, int step, unsigned int* step_active,
