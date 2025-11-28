@@ -43,12 +43,6 @@ Other keybinds:
 
 ## how to build
 
-install dependencies (for debian-based systems):
-
-```bash
-sudo apt install git build-essential cmake libportaudio2 portaudio19-dev libftxui-dev
-```
-
 clone repository:
 
 ```bash

@@ -7,3 +7,6 @@
 [submodule "lib/ftxui"]
 	path = lib/ftxui
 	url = https://github.com/ArthurSonzogni/FTXUI.git
+[submodule "lib/portaudio"]
+	path = lib/portaudio
+	url = https://github.com/PortAudio/portaudio.git

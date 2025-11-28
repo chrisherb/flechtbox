@@ -160,15 +160,13 @@ target_include_directories(flechtbox
     include
 )
 
-# Link system libraries
-target_link_libraries(flechtbox
-  PRIVATE
-    portaudio
-)
-
 # add trnr-lib
 add_subdirectory(lib/trnr-lib)
 target_link_libraries(flechtbox PRIVATE trnr-lib)
+
+# add portaudio
+add_subdirectory(lib/portaudio)
+target_link_libraries(flechtbox PRIVATE portaudio)
 
 # add ftxui
 add_subdirectory(lib/ftxui)
