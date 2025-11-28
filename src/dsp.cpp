@@ -69,11 +69,16 @@ void flechtbox_track_init(flechtbox_track& p)
 
 bool rand_bool(int probability)
 {
-	// Generate a random number from 0 to 99
-	int randomValue = rand() % 100;
+	if (probability < 100) {
+		// Generate a random number from 0 to 99
+		static thread_local std::mt19937 rng(std::random_device {}());
+		std::uniform_int_distribution<int> dist(0, 100);
 
-	// Return true if random value is less than the probability
-	return randomValue < probability;
+		// Return true if random value is less than the probability
+		return dist(rng) < probability;
+	} else {
+		return true;
+	}
 }
 
 float randf(float amount, float min = -0.5f, float max = 0.5f)
@@ -82,8 +87,9 @@ float randf(float amount, float min = -0.5f, float max = 0.5f)
 		static thread_local std::mt19937 rng(std::random_device {}());
 		std::uniform_real_distribution<float> dist(min, max);
 		return dist(rng) * amount;
+	} else {
+		return 0.f;
 	}
-	return 0.f;
 }
 
 void dsp_process_block(std::shared_ptr<flechtbox_dsp> dsp, float* out, int block_size)
