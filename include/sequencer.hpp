@@ -32,7 +32,7 @@ inline int
 track_seq_process_step(track_seq& t,
 					   const std::array<bool, CL_NUM_CLOCK_DIVISIONS>& clock_states)
 {
-	// only process if we land on a division;
+	// only process if we land on a division
 	if (!clock_states[t.division]) return SEQ_NULL;
 
 	// read current position

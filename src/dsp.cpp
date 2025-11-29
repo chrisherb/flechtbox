@@ -101,11 +101,11 @@ void dsp_process_block(std::shared_ptr<flechtbox_dsp> dsp, float* out, int block
 	// convert from internal block size to whatever size the host is running
 	for (int block_count = 0; block_count < block_size; block_count += PLAITS_BLOCKSIZE) {
 		// clock states for this block
-		clock_process_block(dsp->clock, PLAITS_BLOCKSIZE);
+		auto& clock_state = clock_process_block(dsp->clock, PLAITS_BLOCKSIZE);
 
-		track_seq_process_step(dsp->pitch_sequence, dsp->clock.cur_clock_states);
-		track_seq_process_step(dsp->octave_sequence, dsp->clock.cur_clock_states);
-		track_seq_process_step(dsp->velocity_sequence, dsp->clock.cur_clock_states);
+		track_seq_process_step(dsp->pitch_sequence, clock_state);
+		track_seq_process_step(dsp->octave_sequence, clock_state);
+		track_seq_process_step(dsp->velocity_sequence, clock_state);
 
 		int global_pitch = dsp->pitch_sequence.last_value;
 		int global_octave = dsp->octave_sequence.last_value;
@@ -117,8 +117,7 @@ void dsp_process_block(std::shared_ptr<flechtbox_dsp> dsp, float* out, int block
 
 			if (!t.enabled) continue;
 
-			int step_probability =
-				track_seq_process_step(t.sequencer, dsp->clock.cur_clock_states);
+			int step_probability = track_seq_process_step(t.sequencer, clock_state);
 
 			// TRIGGERED
 			if (!t.muted && rand_bool(step_probability)) {

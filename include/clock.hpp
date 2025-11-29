@@ -20,31 +20,33 @@ struct metronome {
 	bool quarter_gate = false;
 	bool thirtysecond_gate = false;
 
-	std::array<double, CL_NUM_CLOCK_DIVISIONS> phases = {0.0}; // For each clock
+	std::array<float, CL_NUM_CLOCK_DIVISIONS> phases = {0.0}; // For each clock
 	std::array<bool, CL_NUM_CLOCK_DIVISIONS> cur_clock_states = {false};
 };
 
-inline void clock_process_block(metronome& c, int frames)
+// Division multipliers (relative to quarter note)
+static constexpr float division_multipliers[CL_NUM_CLOCK_DIVISIONS] = {
+	1.0f / 4.0f, // whole note
+	1.0f / 2.0f, // half note
+	1.0f,		 // quarter note
+	2.0f,		 // eighth
+	4.0f,		 // sixteenth
+	8.0f		 // thirtysecond
+};
+
+inline std::array<bool, CL_NUM_CLOCK_DIVISIONS>& clock_process_block(metronome& c,
+																	 int frames)
 {
-	if (!c.running) return;
+	if (!c.running) return c.cur_clock_states;
 
-	// Division multipliers (relative to quarter note)
-	static constexpr double division_multiplier[CL_NUM_CLOCK_DIVISIONS] = {
-		1.0 / 4.0, // whole note
-		1.0 / 2.0, // half note
-		1.0,	   // quarter note
-		2.0,	   // eighth
-		4.0,	   // sixteenth
-		8.0		   // thirtysecond
-	};
-
+	// clear clock states
 	for (int div = 0; div < CL_NUM_CLOCK_DIVISIONS; ++div)
 		c.cur_clock_states[div] = false;
 
 	for (int i = 0; i < frames; ++i) {
 		for (int div = 0; div < CL_NUM_CLOCK_DIVISIONS; ++div) {
 			// Calculate frequency (beats per second)
-			double bps = (c.tempo / 60.0) * division_multiplier[div];
+			double bps = (c.tempo / 60.0) * division_multipliers[div];
 			double phase_inc = bps / c.samplerate;
 			c.phases[div] += phase_inc;
 			if (c.phases[div] >= 1.0) {
@@ -59,4 +61,6 @@ inline void clock_process_block(metronome& c, int frames)
 		c.quarter_gate = (quarter_phase < 0.5);
 		c.thirtysecond_gate = (thirty_second_phase < 0.5);
 	}
+
+	return c.cur_clock_states;
 }
