@@ -32,7 +32,7 @@ To manipulate parameters, use ctrl+up/down or K/J.
 
 To set the minimum/maximum value of a control, press PageDown/PageUp or ctrl+j/ctrl+k
 
-To toggle between minimum/maximum values of slider controls, press space.
+To toggle between minimum/maximum values of slider controls, press space or enter.
 
 Other keybinds:
 

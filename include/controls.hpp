@@ -33,6 +33,12 @@ inline bool is_event_decrease_max(Event event)
 	return event == Event::PageDown || event == Event::CtrlJ;
 }
 
+inline bool is_event_toggle(Event event)
+{
+
+	return event == Event::Return || event == Event::Character(' ');
+}
+
 inline Component Light(bool* light_on)
 {
 	auto renderer = Renderer([light_on] {
@@ -162,7 +168,7 @@ inline Component StepSlider(int* value_ptr, int step, unsigned int* step_active,
 	auto catcher =
 		CatchEvent(renderer, [value_ptr, increment, min_value, max_value](Event event) {
 			if (!value_ptr) return false;
-			if (event == Event::Character(' ')) {
+			if (is_event_toggle(event)) {
 				if (*value_ptr < max_value) *value_ptr = max_value;
 				else *value_ptr = min_value;
 				return true;
